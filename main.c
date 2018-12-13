@@ -5,7 +5,7 @@ int main()
 {
 	t_app app;
 
-	app = app_init();
+	app_init(&app);
 //	app_run();
 	return 0;
 }
