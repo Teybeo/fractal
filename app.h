@@ -6,12 +6,14 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2018/12/13 18:33:23 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2018/12/17 17:35:43 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef APP_H
 # define APP_H
+
+# include "t_float2.h"
 
 # include <stdint.h>
 # include <stdbool.h>
@@ -31,12 +33,6 @@ enum	e_key
 	KEY_LAST = 512
 };
 
-struct	s_float2 {
-	float x;
-	float y;
-};
-typedef struct s_float2	t_float2;
-
 struct	s_config
 {
 	int			depth_max;
@@ -55,6 +51,7 @@ struct	s_app
 	uint32_t	*pixels;
 	t_config	config;
 	bool		keystate[KEY_LAST];
+	bool		need_redraw;
 };
 typedef struct s_app	t_app;
 
