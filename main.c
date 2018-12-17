@@ -1,11 +1,9 @@
-#include <stdio.h>
 #include "app.h"
 
-int main()
+int	main()
 {
 	t_app app;
 
 	app_init(&app);
-//	app_run();
-	return 0;
+	return (0);
 }

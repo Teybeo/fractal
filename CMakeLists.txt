@@ -6,7 +6,7 @@ add_compile_options(-Wall -Wextra)
 
 #link_libraries(-fsanitize=address)
 
-set(CMAKE_C_FLAGS_RELEASE "-O2 -flto -march=native")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -flto -g3 -march=native")
 
 set(CMAKE_C_STANDARD 99)
 

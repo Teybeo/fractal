@@ -121,6 +121,7 @@ int		app_callback(void *param)
 	mlx_clear_window(app->mlx_context, app->mlx_window);
 	app_update(app);
 	app_draw(*app);
+//	app_draw(*app);
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
 	return (0);
@@ -156,12 +157,31 @@ float get_frametime()
 	return duration;
 }
 
+int	get_mandelbrot_value(t_float2 c, int depth_max)
+{
+	t_float2	z;
+	t_float2	z_squared;
+	int			depth;
+
+	depth = 0;
+	z = (t_float2){};
+	z_squared = (t_float2){z.x * z.x, z.y * z.y};
+	while (((z_squared.x + z_squared.y) < 4) && (depth < depth_max))
+	{
+		z.y = 2 * z.x * z.y + c.y;
+		z.x = z_squared.x - z_squared.y + c.x;
+		depth++;
+		z_squared = (t_float2){z.x * z.x, z.y * z.y};
+	}
+	if (depth == depth_max)
+		return (0);
+	return (depth - 1);
+}
+
 void	app_draw(t_app app)
 {
 	int			x;
 	int			y;
-	t_float2	z;
-	t_float2	z_squared;
 	t_float2	c;
 	int			depth;
 
@@ -169,25 +189,12 @@ void	app_draw(t_app app)
 	while (y < app.win_size.y)
 	{
 		x = 0;
-//		c.y = y;
 		c.y = (y / app.win_size.y) * (app.config.z_size.y) + (app.config.z_min.y);
 		while (x < app.win_size.x)
 		{
-			depth = 0;
 			c.x = (x / app.win_size.x) * (app.config.z_size.x) + (app.config.z_min.x);
 //			c.x = (x / app.win_size.x) * (app.config.z_max.x - app.config.z_min.x) + (app.config.z_min.x);
-			z = (t_float2){};
-			z_squared = (t_float2){z.x * z.x, z.y * z.y};
-			while (((z_squared.x + z_squared.y) < 4) && (depth < app.config.depth_max))
-			{
-				z.y = 2 * z.x * z.y + c.y;
-				z.x = z_squared.x - z_squared.y + c.x;
-				depth++;
-				z_squared = (t_float2){z.x * z.x, z.y * z.y};
-			}
-			if (depth == app.config.depth_max)
-				depth = 1;
-			depth--;
+			depth = get_mandelbrot_value(c, app.config.depth_max);
 			int channel = (255.f * (depth / (float)app.config.depth_max));
 			app.pixels[(int)(y * app.win_size.x + x)] = (0xFF & channel) << 8;
 			x++;
