@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2018/12/19 12:20:49 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2018/12/19 17:58:37 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ struct	s_app
 	t_config	config;
 	int			thread_count;
 	bool		keystate[KEY_LAST];
+	bool		is_dragging;
 };
 typedef struct s_app	t_app;
 

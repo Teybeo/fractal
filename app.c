@@ -36,7 +36,7 @@ int	keydown_event(int keycode, void *param)
 	t_app *app;
 
 	app = param;
-//	printf("Frame: %lu, %d KEYDOWN\n", frame_counter, keycode);
+	printf("Frame: %lu, %d KEYDOWN\n", frame_counter, keycode);
 	app->keystate[keycode] = true;
 	return 0;
 }
@@ -46,7 +46,7 @@ int	keyup_event(int keycode, void *param)
 	t_app *app;
 
 	app = param;
-//	printf("Frame: %lu, %d KEYUP\n", frame_counter, keycode);
+	printf("Frame: %lu, %d KEYUP\n", frame_counter, keycode);
 	app->keystate[keycode] = false;
 	if (keycode == KEY_ESCAPE)
 		exit(0);
@@ -64,11 +64,46 @@ int	mouse_down(int button, int x, int y, void *param)
 	t_app *app;
 
 	app = param;
+	if (y < 0)
+		return (0);
 	if (button == 1)
+		app->is_dragging = true;
+	if (button == 4)
 		config_zoom_to(app, x, y);
-	if (button == 2)
+	if (button == 5)
 		config_dezoom_from(app, x, y);
 	return 0;
+}
+
+int	mouse_up(int button, int x, int y, void *param)
+{
+	t_app *app;
+
+	app = param;
+	if (button == 1)
+		app->is_dragging = false;
+	return 0;
+}
+
+int mouse_move(int x, int y, void *param)
+{
+	static t_float2	old_pos;
+	t_float2	new_pos;
+	t_float2	delta;
+	t_app		*app;
+
+	app = param;
+	new_pos = (t_float2){x, y};
+	delta = float2_sub(old_pos, new_pos);
+	old_pos = new_pos;
+	delta.x = (delta.x / app->win_size.x) * app->config.z_size.x;
+	delta.y = (delta.y / app->win_size.y) * app->config.z_size.y;
+	if (app->is_dragging)
+	{
+		float2_add_this(&app->config.z_max, delta);
+		float2_add_this(&app->config.z_min, delta);
+	}
+	return (0);
 }
 
 void config_zoom_to(t_app *app, int x, int y)
@@ -133,8 +168,8 @@ void	app_init(t_app *app)
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
 	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
 	mlx_hook(app->mlx_window, 4, osef, mouse_down, app);
-//	mlx_hook(app->mlx_window, 5, osef, mouse_up, app);
-//	mlx_hook(app->mlx_window, 6, osef, mouse_move, app);
+	mlx_hook(app->mlx_window, 5, osef, mouse_up, app);
+	mlx_hook(app->mlx_window, 6, osef, mouse_move, app);
 	mlx_hook(app->mlx_window, 17, osef, quit_event, NULL);
 //	mlx_expose_hook(app->mlx_window, expose_callback, app);
 	mlx_loop_hook(app->mlx_context, app_callback, app);
@@ -221,6 +256,9 @@ void	app_draw_ui(t_app app)
 	sprintf(string, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1000 / time);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 10, 0x00FFFFFF, string);
 	memset(string, 0, sizeof(string));
+	sprintf(string, "Threads: %d", app.thread_count);
+	mlx_string_put(app.mlx_context, app.mlx_window, 10, 90, 0x00FFFFFF, string);
+	memset(string, 0, sizeof(string));
 	sprintf(string, "Depth max: %-5d", app.config.depth_max);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 30, 0x00FFFFFF, string);
 	memset(string, 0, sizeof(string));
@@ -229,11 +267,8 @@ void	app_draw_ui(t_app app)
 	memset(string, 0, sizeof(string));
 	sprintf(string, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 70, 0x00FFFFFF, string);
-	memset(string, 0, sizeof(string));
-	sprintf(string, "Threads: %d", app.thread_count);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 90, 0x00FFFFFF, string);
 }
-#if 1
+
 float get_frametime()
 {
 	static struct timespec	start = {};
@@ -246,17 +281,7 @@ float get_frametime()
 	start = now;
 	return (duration);
 }
-#else
-float get_frametime()
-{
-	float duration;
-	static clock_t start = 0;
 
-	duration = (clock() - start) / (float)CLOCKS_PER_SEC;
-	start = clock();
-	return duration * 1000.f;
-}
-#endif
 #if 1
 int	get_mandelbrot_value(t_float2 c, int depth_max)
 {

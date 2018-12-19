@@ -7,3 +7,4 @@ int	main()
 	app_init(&app);
 	return (0);
 }
+
