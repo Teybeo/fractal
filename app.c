@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
+#include <pthread.h>
 
 t_config	config_init()
 {
@@ -51,6 +52,10 @@ int	keyup_event(int keycode, void *param)
 		exit(0);
 	if (keycode == KEY_R)
 		app->config = config_init();
+	if (keycode == KEY_MORE)
+		app->thread_count++;
+	if (keycode == KEY_LESS)
+		app->thread_count -= (app->thread_count != 0);
 	return 0;
 }
 
@@ -117,6 +122,7 @@ void	app_init(t_app *app)
 	int osef;
 
 	app->win_size = (t_float2){1000, 1000};
+	app->thread_count = 4;
 	memset(app->keystate, 0, sizeof(app->keystate));
 	app->mlx_context = mlx_init();
 	app->config = config_init();
@@ -140,6 +146,8 @@ float get_frametime();
 void	app_draw_ui(t_app app);
 
 
+void	app_draw_parallel(t_app app)
+;
 
 void	app_update(t_app *app)
 {
@@ -195,34 +203,50 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-	app_draw(*app);
+//	app_draw(*app);
+	app_draw_parallel(*app);
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
 	frame_counter++;
-	app->need_redraw = false;
 	return (0);
 }
 
 void	app_draw_ui(t_app app)
 {
 	float	time;
-	char	*string;
+	char	string[512];
 
 	time = get_frametime();
-	asprintf(&string, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1 / time);
+	memset(string, 0, sizeof(string));
+	sprintf(string, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1000 / time);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 10, 0x00FFFFFF, string);
-	free(string);
-	asprintf(&string, "Depth max: %-5d", app.config.depth_max);
+	memset(string, 0, sizeof(string));
+	sprintf(string, "Depth max: %-5d", app.config.depth_max);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 30, 0x00FFFFFF, string);
-	free(string);
-	asprintf(&string, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
+	memset(string, 0, sizeof(string));
+	sprintf(string, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 50, 0x00FFFFFF, string);
-	free(string);
-	asprintf(&string, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
+	memset(string, 0, sizeof(string));
+	sprintf(string, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
 	mlx_string_put(app.mlx_context, app.mlx_window, 10, 70, 0x00FFFFFF, string);
-	free(string);
+	memset(string, 0, sizeof(string));
+	sprintf(string, "Threads: %d", app.thread_count);
+	mlx_string_put(app.mlx_context, app.mlx_window, 10, 90, 0x00FFFFFF, string);
 }
+#if 1
+float get_frametime()
+{
+	static struct timespec	start = {};
+	struct timespec			now = {};
+	float					duration;
 
+	clock_gettime (CLOCK_REALTIME, &now);
+	duration = (now.tv_sec - start.tv_sec) * 1000
+			+ (now.tv_nsec - start.tv_nsec) / 1000000.f;
+	start = now;
+	return (duration);
+}
+#else
 float get_frametime()
 {
 	float duration;
@@ -230,8 +254,9 @@ float get_frametime()
 
 	duration = (clock() - start) / (float)CLOCKS_PER_SEC;
 	start = clock();
-	return duration;
+	return duration * 1000.f;
 }
+#endif
 #if 1
 int	get_mandelbrot_value(t_float2 c, int depth_max)
 {
@@ -280,6 +305,7 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 	return (depth - 1);
 }
 #endif
+
 void	app_draw(t_app app)
 {
 	int			x;
@@ -304,3 +330,86 @@ void	app_draw(t_app app)
 		y++;
 	}
 }
+
+#define MAX_THREAD 16
+
+typedef struct thread_config {
+	t_config	config;
+	t_float2	win_size;
+	int			first_line;
+	int			last_line;
+	uint32_t	*pixels;
+	char		thread_id;
+} thread_config;
+
+void	prepare_threads(t_app app, thread_config *thread_list)
+{
+	int i;
+	i = 0;
+	while (i < app.thread_count)
+	{
+		thread_list[i].win_size = app.win_size;
+		thread_list[i].first_line = i * (app.win_size.y / app.thread_count);
+		thread_list[i].last_line = (i + 1) * (app.win_size.y / app.thread_count);
+		thread_list[i].config = app.config;
+		thread_list[i].pixels = app.pixels;
+		thread_list[i].thread_id = i;
+		i++;
+	}
+}
+
+void	*partial_draw(void *param)
+{
+	int				x;
+	int				y;
+	t_float2		c;
+	int				depth;
+	thread_config	conf;
+
+	conf = *(thread_config*)param;
+	y = conf.first_line;
+	while (y < conf.last_line)
+	{
+		x = 0;
+		c.y = (y / conf.win_size.y) * (conf.config.z_size.y) + (conf.config.z_min.y);
+		while (x < conf.win_size.x)
+		{
+			c.x = (x / conf.win_size.x) * (conf.config.z_size.x) + (conf.config.z_min.x);
+//			c.x = (x / conf.win_size.x) * (conf.config.z_max.x - conf.config.z_min.x) + (conf.config.z_min.x);
+			depth = get_mandelbrot_value(c, conf.config.depth_max);
+			int channel = (255.f * (depth / (float)conf.config.depth_max));
+			conf.pixels[(int)(y * conf.win_size.x + x)] = (0xFF & channel) << 8;
+			conf.pixels[(int)(y * conf.win_size.x + x)] |= (0xFF & conf.thread_id * 16) << 16;
+			x++;
+		}
+		y++;
+	}
+	return NULL;
+}
+
+
+void	app_draw_parallel(t_app app)
+{
+	int i;
+
+	thread_config thread_config_list[MAX_THREAD] = {};
+//	thread_config *thread_config_list = malloc(sizeof(thread_config) * app.thread_count);
+	pthread_t thread_list[MAX_THREAD] = {};
+	prepare_threads(app, thread_config_list);
+	i = 0;
+	while (i < app.thread_count)
+	{
+		pthread_create(thread_list + i, NULL, partial_draw, thread_config_list + i);
+		i++;
+	}
+
+	i = 0;
+	while (i < app.thread_count)
+	{
+		pthread_join(thread_list[i], NULL);
+		i++;
+	}
+
+//	free(thread_config_list);
+}
+

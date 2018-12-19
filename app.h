@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2018/12/17 17:35:43 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2018/12/19 12:20:49 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@ enum	e_key
 	KEY_MINUS = 78,
 	KEY_ZOOM = 116,
 	KEY_DEZOOM = 121,
+	KEY_MORE = 24,
+	KEY_LESS = 27,
 	KEY_LAST = 512
 };
 
@@ -50,8 +52,8 @@ struct	s_app
 	t_float2	win_size;
 	uint32_t	*pixels;
 	t_config	config;
+	int			thread_count;
 	bool		keystate[KEY_LAST];
-	bool		need_redraw;
 };
 typedef struct s_app	t_app;
 
