@@ -12,9 +12,11 @@
 t_config	config_init()
 {
 	t_config config;
-	config.depth_max = 10;
-	config.z_min = (t_float2){-2, -2};
-	config.z_max = (t_float2){2, 2};
+	config.depth_max = 100;
+//	config.z_min = (t_float2){-2, -2};
+//	config.z_max = (t_float2){2, 2};
+	config.z_min = (t_float2){-0.6, -0.};
+	config.z_max = (t_float2){-0.8, -0.2};
 	config.z_size = float2_sub(config.z_max, config.z_min);
 	return (config);
 }
@@ -85,6 +87,42 @@ int	mouse_up(int button, int x, int y, void *param)
 	return 0;
 }
 
+typedef struct s_rect {
+	t_float2 origin;
+	t_float2 size;
+} t_rect;
+
+void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
+{
+	if ((dst.origin.y > src.origin.y) || ((dst.origin.y == src.origin.y) && (dst.origin.x > src.origin.y)))
+	{
+		for (int y = src.size.y - 1; y >= 0; --y)
+		{
+			for (int x = src.size.x - 1; x >= 0; --x)
+			{
+				int src_index = (int) ((src.origin.y + y) * bounds.x + src.origin.x + x);
+				int dst_index = (int) ((dst.origin.y + y) * bounds.x + dst.origin.x + x);
+				data[dst_index] = data[src_index];
+			}
+		}
+	}
+	else
+	{
+		for (int y = 0; y < src.size.y; ++y)
+		{
+			for (int x = 0; x < src.size.x; ++x)
+			{
+				int src_index = (int) ((src.origin.y + y) * bounds.x + src.origin.x + x);
+				int dst_index = (int) ((dst.origin.y + y) * bounds.x + dst.origin.x + x);
+				data[dst_index] = data[src_index];
+			}
+		}
+	}
+}
+
+void	app_draw_parallel(t_app app)
+;
+
 int mouse_move(int x, int y, void *param)
 {
 	static t_float2	old_pos;
@@ -96,12 +134,42 @@ int mouse_move(int x, int y, void *param)
 	new_pos = (t_float2){x, y};
 	delta = float2_sub(old_pos, new_pos);
 	old_pos = new_pos;
-	delta.x = (delta.x / app->win_size.x) * app->config.z_size.x;
-	delta.y = (delta.y / app->win_size.y) * app->config.z_size.y;
+
 	if (app->is_dragging)
 	{
+		t_rect src = {};
+		t_rect dst = {};
+		src.size = app->win_size;
+		if (delta.x < 0)
+		{
+			src.origin.x = 0;
+			src.size.x = app->win_size.x + delta.x;
+			dst.origin.x = -delta.x;
+		}
+		else if (delta.x > 0)
+		{
+			src.origin.x = delta.x;
+			src.size.x = app->win_size.x - delta.x;
+			dst.origin.x = 0;
+		}
+		if (delta.y < 0)
+		{
+			src.origin.y = 0;
+			src.size.y = app->win_size.y + delta.y;
+			dst.origin.y = -delta.y;
+		}
+		else if (delta.y > 0)
+		{
+			src.origin.y = delta.y;
+			src.size.y = app->win_size.y - delta.y;
+			dst.origin.y = 0;
+		}
+		delta.x = (delta.x / app->win_size.x) * app->config.z_size.x;
+		delta.y = (delta.y / app->win_size.y) * app->config.z_size.y;
 		float2_add_this(&app->config.z_max, delta);
 		float2_add_this(&app->config.z_min, delta);
+		copy_region(src, dst, app->win_size, app->pixels);
+		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	}
 	return (0);
 }
@@ -157,7 +225,8 @@ void	app_init(t_app *app)
 	int osef;
 
 	app->win_size = (t_float2){1000, 1000};
-	app->thread_count = 4;
+	app->thread_count = 1;
+	app->is_dragging = false;
 	memset(app->keystate, 0, sizeof(app->keystate));
 	app->mlx_context = mlx_init();
 	app->config = config_init();
@@ -177,35 +246,26 @@ void	app_init(t_app *app)
 }
 
 float get_frametime();
-
 void	app_draw_ui(t_app app);
-
-
-void	app_draw_parallel(t_app app)
-;
+void	app_draw_parallel(t_app app);
 
 void	app_update(t_app *app)
 {
+	t_float2	delta;
+	delta = (t_float2){};
+
 	if (app->keystate[KEY_UP])
-	{
-		app->config.z_min.y -= 0.02f * app->config.z_size.y;
-		app->config.z_max.y -= 0.02f * app->config.z_size.y;
-	}
+		delta.y -= 0.02f * app->config.z_size.y;
 	if (app->keystate[KEY_DOWN])
-	{
-		app->config.z_min.y += 0.02f * app->config.z_size.y;
-		app->config.z_max.y += 0.02f * app->config.z_size.y;
-	}
+		delta.y += 0.02f * app->config.z_size.y;
 	if (app->keystate[KEY_RIGHT])
-	{
-		app->config.z_min.x += 0.02f * app->config.z_size.x;
-		app->config.z_max.x += 0.02f * app->config.z_size.x;
-	}
+		delta.x += 0.02f * app->config.z_size.x;
 	if (app->keystate[KEY_LEFT])
-	{
-		app->config.z_min.x -= 0.02f * app->config.z_size.x;
-		app->config.z_max.x -= 0.02f * app->config.z_size.x;
-	}
+		delta.x -= 0.02f * app->config.z_size.x;
+
+	float2_add_this(&app->config.z_min, delta);
+	float2_add_this(&app->config.z_max, delta);
+
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
 	if (app->keystate[KEY_MINUS])
@@ -286,23 +346,27 @@ float get_frametime()
 int	get_mandelbrot_value(t_float2 c, int depth_max)
 {
 	t_float2	z;
-	t_float2	z_old;
-	t_float2	z_squared;
+//	t_float2	z_old;
 	int			depth;
 
 	depth = 0;
 	z = c;
-	z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	z_old = z;
-	while (((z_squared.x + z_squared.y) < 4) && (depth < depth_max))
+//	z_old = z;
+//	while (((z.x < 2 && z.x > -2) && (z.y < 2 && z.y > -2)) && (depth < depth_max))
+	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{
-		z.y = 2 * z.x * z.y + c.y;
-		z.x = z_squared.x - z_squared.y + c.x;
+		float z_y_temp = 2 * z.x * z.y + c.y;
+//		z.y = 2 * z.x * z.y + c.y;
+//		z.x = z_squared.x - z_squared.y + c.x;
+		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
+		z.y = z_y_temp;
 		depth++;
-		z_squared = (t_float2){z.x * z.x, z.y * z.y};
-		if (z.x == z_old.x && z.y == z_old.y)
-			depth = depth_max;
-		z_old = z;
+//		if (z.x == z_old.x && z.y == z_old.y)
+//		{
+//			depth = depth_max;
+//			break;
+//		}
+//		z_old = z;
 	}
 	if (depth == depth_max)
 		return (0);
@@ -392,19 +456,25 @@ void	*partial_draw(void *param)
 	thread_config	conf;
 
 	conf = *(thread_config*)param;
+//	int pixel_id;
+//	float inv_x = 1.f / conf.win_size.x;
+//	float inv_y = 1 / conf.win_size.y;
 	y = conf.first_line;
 	while (y < conf.last_line)
 	{
 		x = 0;
 		c.y = (y / conf.win_size.y) * (conf.config.z_size.y) + (conf.config.z_min.y);
+//		c.y = (y * inv_y) * (conf.config.z_size.y) + (conf.config.z_min.y);
+//		pixel_id = y * conf.win_size.x;
 		while (x < conf.win_size.x)
 		{
 			c.x = (x / conf.win_size.x) * (conf.config.z_size.x) + (conf.config.z_min.x);
+//			c.x = (x * inv_x) * (conf.config.z_size.x) + (conf.config.z_min.x);
 //			c.x = (x / conf.win_size.x) * (conf.config.z_max.x - conf.config.z_min.x) + (conf.config.z_min.x);
 			depth = get_mandelbrot_value(c, conf.config.depth_max);
 			int channel = (255.f * (depth / (float)conf.config.depth_max));
 			conf.pixels[(int)(y * conf.win_size.x + x)] = (0xFF & channel) << 8;
-			conf.pixels[(int)(y * conf.win_size.x + x)] |= (0xFF & conf.thread_id * 16) << 16;
+//			conf.pixels[(int)(y * conf.win_size.x + x)] |= (0xFF & conf.thread_id * 16) << 16;
 			x++;
 		}
 		y++;
