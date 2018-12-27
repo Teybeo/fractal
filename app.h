@@ -17,6 +17,7 @@
 
 # include <stdint.h>
 # include <stdbool.h>
+#include <SDL_render.h>
 
 enum	e_key
 {
@@ -46,9 +47,9 @@ typedef struct s_config	t_config;
 
 struct	s_app
 {
-	void		*mlx_context;
-	void		*mlx_texture;
-	void		*mlx_window;
+	SDL_Renderer	*mlx_context;
+	SDL_Texture		*mlx_texture;
+	SDL_Window		*mlx_window;
 	t_float2	win_size;
 	uint32_t	*pixels;
 	t_config	config;

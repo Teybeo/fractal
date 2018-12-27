@@ -1,6 +1,6 @@
 #include "app.h"
 
-#include <mlx.h>
+#include "SDL.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
@@ -8,15 +8,16 @@
 #include <memory.h>
 #include <math.h>
 #include <pthread.h>
+#include <mlx.h>
 
 t_config	config_init()
 {
 	t_config config;
 	config.depth_max = 100;
-//	config.z_min = (t_float2){-2, -2};
-//	config.z_max = (t_float2){2, 2};
-	config.z_min = (t_float2){-0.6, -0.};
-	config.z_max = (t_float2){-0.8, -0.2};
+	config.z_min = (t_float2){-2, -2};
+	config.z_max = (t_float2){2, 2};
+//	config.z_min = (t_float2){-0.6, -0.};
+//	config.z_max = (t_float2){-0.8, -0.2};
 	config.z_size = float2_sub(config.z_max, config.z_min);
 	return (config);
 }
@@ -120,8 +121,7 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 	}
 }
 
-void	app_draw_parallel(t_app app)
-;
+void	app_draw_parallel(t_app app);
 
 int mouse_move(int x, int y, void *param)
 {
@@ -169,7 +169,10 @@ int mouse_move(int x, int y, void *param)
 		float2_add_this(&app->config.z_max, delta);
 		float2_add_this(&app->config.z_min, delta);
 		copy_region(src, dst, app->win_size, app->pixels);
-		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
+		SDL_UpdateTexture(app->mlx_texture, 0, app->pixels, app->win_size.x * 4);
+		SDL_RenderCopy(app->mlx_context, app->mlx_texture, NULL, NULL);
+		SDL_RenderPresent(app->mlx_context);
+//		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	}
 	return (0);
 }
@@ -228,26 +231,44 @@ void	app_init(t_app *app)
 	app->thread_count = 1;
 	app->is_dragging = false;
 	memset(app->keystate, 0, sizeof(app->keystate));
-	app->mlx_context = mlx_init();
+	SDL_Init(SDL_INIT_VIDEO);
 	app->config = config_init();
-	app->mlx_window = mlx_new_window(app->mlx_context, app->win_size.x, app->win_size.y, "Wireframe");
-	app->mlx_texture = mlx_new_image(app->mlx_context, app->win_size.x, app->win_size.y);
-	app->pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
-	mlx_do_key_autorepeatoff(app->mlx_context);
-	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
-	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
-	mlx_hook(app->mlx_window, 4, osef, mouse_down, app);
-	mlx_hook(app->mlx_window, 5, osef, mouse_up, app);
-	mlx_hook(app->mlx_window, 6, osef, mouse_move, app);
-	mlx_hook(app->mlx_window, 17, osef, quit_event, NULL);
+	SDL_CreateWindowAndRenderer(app->win_size.x, app->win_size.y, SDL_WINDOW_RESIZABLE, &app->mlx_window, &app->mlx_context);
+//	app->mlx_window = SDL_CreateWindow("Fractol", 0, 0, app->win_size.x, app->win_size.y, SDL_WINDOW_RESIZABLE);
+//	app->mlx_context = SDL_CreateRenderer(app->mlx_window, -1, SDL_RENDERER_ACCELERATED);
+//	app->mlx_window = mlx_new_window(app->mlx_context, app->win_size.x, app->win_size.y, "Wireframe");
+//	app->mlx_texture = mlx_new_image(app->mlx_context, app->win_size.x, app->win_size.y);
+	app->mlx_texture = SDL_CreateTexture(app->mlx_context, SDL_PIXELFORMAT_BGRA8888, SDL_TEXTUREACCESS_STREAMING, app->win_size.x, app->win_size.y);
+
+//	app->pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
+	app->pixels = malloc(sizeof(char) * 4 * app->win_size.x * app->win_size.y);
+//	printf("%p\n", app->mlx_context);
+//	app->mlx_context = SDL_CreateRenderer(app->mlx_window, 0, SDL_RENDERER_ACCELERATED);
+	SDL_RendererInfo info;
+	SDL_GetRendererInfo(app->mlx_context, &info);
+	printf("%s\n", info.name);
+	printf("Accelerated: %d\n", !!(info.flags & SDL_RENDERER_ACCELERATED));
+	printf("software: %d\n", !!(info.flags & SDL_RENDERER_SOFTWARE));
+	printf("Targettexture: %d\n", !!(info.flags & SDL_RENDERER_TARGETTEXTURE));
+	printf("vsyncpresent: %d\n", !!(info.flags & SDL_RENDERER_PRESENTVSYNC));
+//	mlx_do_key_autorepeatoff(app->mlx_context);
+//	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
+//	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
+//	mlx_hook(app->mlx_window, 4, osef, mouse_down, app);
+//	mlx_hook(app->mlx_window, 5, osef, mouse_up, app);
+//	mlx_hook(app->mlx_window, 6, osef, mouse_move, app);
+//	mlx_hook(app->mlx_window, 17, osef, quit_event, NULL);
 //	mlx_expose_hook(app->mlx_window, expose_callback, app);
-	mlx_loop_hook(app->mlx_context, app_callback, app);
-	mlx_loop(app->mlx_context);
+//	mlx_loop_hook(app->mlx_context, app_callback, app);
+//	mlx_loop(app->mlx_context);
+	while (true)
+	{
+		app_callback(app);
+	}
 }
 
 float get_frametime();
 void	app_draw_ui(t_app app);
-void	app_draw_parallel(t_app app);
 
 void	app_update(t_app *app)
 {
@@ -292,17 +313,43 @@ void	app_update(t_app *app)
 	}
 }
 
+void	app_event(t_app *app)
+{
+	SDL_Event ev;
+	while (SDL_PollEvent(&ev))
+	{
+		if (ev.type == SDL_QUIT)
+			exit(0);
+		if (ev.type == SDL_MOUSEMOTION)
+		{
+			printf("%d, %d\n", ev.motion.x, ev.motion.y);
+			mouse_move(ev.motion.x, ev.motion.y, app);
+		}
+		if (ev.type == SDL_MOUSEBUTTONDOWN)
+			app->is_dragging = true;
+		if (ev.type == SDL_MOUSEBUTTONUP)
+			app->is_dragging = false;
+	}
+}
+
 int		app_callback(void *param)
 {
 	t_app	*app;
+
 	app = param;
+	app_event(app);
 	app_update(app);
-	mlx_clear_window(app->mlx_context, app->mlx_window);
+//	mlx_clear_window(app->mlx_context, app->mlx_window);
+	SDL_RenderClear(app->mlx_context);
 //	app_draw(*app);
 	app_draw_parallel(*app);
-	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
+	SDL_UpdateTexture(app->mlx_texture, NULL, app->pixels, app->win_size.x * 4);
+	SDL_RenderCopy(app->mlx_context, app->mlx_texture, NULL, NULL);
+//	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
+	SDL_RenderPresent(app->mlx_context);
 	frame_counter++;
+
 	return (0);
 }
 
@@ -314,19 +361,19 @@ void	app_draw_ui(t_app app)
 	time = get_frametime();
 	memset(string, 0, sizeof(string));
 	sprintf(string, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1000 / time);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 10, 0x00FFFFFF, string);
+//	mlx_string_put(app.mlx_context, app.mlx_window, 10, 10, 0x00FFFFFF, string);
 	memset(string, 0, sizeof(string));
 	sprintf(string, "Threads: %d", app.thread_count);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 90, 0x00FFFFFF, string);
+//	mlx_string_put(app.mlx_context, app.mlx_window, 10, 90, 0x00FFFFFF, string);
 	memset(string, 0, sizeof(string));
 	sprintf(string, "Depth max: %-5d", app.config.depth_max);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 30, 0x00FFFFFF, string);
+//	mlx_string_put(app.mlx_context, app.mlx_window, 10, 30, 0x00FFFFFF, string);
 	memset(string, 0, sizeof(string));
 	sprintf(string, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 50, 0x00FFFFFF, string);
+//	mlx_string_put(app.mlx_context, app.mlx_window, 10, 50, 0x00FFFFFF, string);
 	memset(string, 0, sizeof(string));
 	sprintf(string, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 70, 0x00FFFFFF, string);
+//	mlx_string_put(app.mlx_context, app.mlx_window, 10, 70, 0x00FFFFFF, string);
 }
 
 float get_frametime()

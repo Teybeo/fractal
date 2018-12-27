@@ -16,5 +16,19 @@ set(SOURCE_FILES
         t_float2.c)
 
 add_executable(fractol ${SOURCE_FILES})
-target_link_libraries(fractol mlx)
-target_link_libraries(fractol "-framework OpenGL -framework AppKit")
+
+# Add SDL2 path to list of searched paths for packages
+set(CMAKE_PREFIX_PATH "D:/Dev/Lib/SDL2-2.0.8")
+
+find_package(SDL2 REQUIRED)
+
+# Stay compatible with old style find_package results
+if (NOT TARGET SDL2::SDL2)
+    target_link_libraries(fractol ${SDL2_LIBRARIES})
+    target_include_directories(fractol PRIVATE ${SDL2_INCLUDE_DIRS})
+else()
+    target_link_libraries(fractol SDL2::SDL2)
+endif()
+
+
+#target_link_libraries(fractol "-framework OpenGL -framework AppKit")
