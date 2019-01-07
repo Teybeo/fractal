@@ -123,6 +123,9 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 void	app_draw_parallel(t_app app)
 ;
 
+void	app_draw_ui(t_app app)
+;
+
 int mouse_move(int x, int y, void *param)
 {
 	static t_float2	old_pos;
@@ -170,6 +173,7 @@ int mouse_move(int x, int y, void *param)
 		float2_add_this(&app->config.z_min, delta);
 		copy_region(src, dst, app->win_size, app->pixels);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
+		app_draw_ui(*app);
 	}
 	return (0);
 }
@@ -227,6 +231,7 @@ void	app_init(t_app *app)
 	app->win_size = (t_float2){1000, 1000};
 	app->thread_count = 1;
 	app->is_dragging = false;
+	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
 	app->mlx_context = mlx_init();
 	app->config = config_init();
@@ -290,6 +295,9 @@ void	app_update(t_app *app)
 		float2_sub_this(&app->config.z_max, size);
 		app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
 	}
+	if (app->keystate[KEY_UP] || app->keystate[KEY_DOWN] || app->keystate[KEY_RIGHT] || app->keystate[KEY_LEFT])
+		app->need_full_redraw = true;
+
 }
 
 int		app_callback(void *param)
@@ -299,7 +307,11 @@ int		app_callback(void *param)
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
 //	app_draw(*app);
-	app_draw_parallel(*app);
+	if (app->need_full_redraw)
+	{
+		app_draw_parallel(*app);
+		app->need_full_redraw = false;
+	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
 	frame_counter++;
