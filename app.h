@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2018/12/27 20:30:59 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/09 14:38:44 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,17 +21,17 @@
 enum	e_key
 {
 	KEY_ESCAPE = 53,
-	KEY_UP = 126,
-	KEY_DOWN = 125,
-	KEY_RIGHT = 124,
-	KEY_LEFT = 123,
+	KEY_UP = 13,
+	KEY_DOWN = 1,
+	KEY_RIGHT = 2,
+	KEY_LEFT = 0,
 	KEY_R = 15,
-	KEY_PLUS = 69,
-	KEY_MINUS = 78,
-	KEY_ZOOM = 116,
-	KEY_DEZOOM = 121,
-	KEY_MORE = 24,
-	KEY_LESS = 27,
+	KEY_MINUS = 7,
+	KEY_PLUS = 8,
+	KEY_ZOOM = 12,
+	KEY_DEZOOM = 6,
+	KEY_LESS = 78,
+	KEY_MORE = 69,
 	KEY_LAST = 512
 };
 
@@ -44,12 +44,18 @@ struct	s_config
 };
 typedef struct s_config	t_config;
 
+typedef struct s_rect {
+	t_float2 origin;
+	t_float2 size;
+} t_rect;
+
 struct	s_app
 {
 	void		*mlx_context;
 	void		*mlx_texture;
 	void		*mlx_window;
 	t_float2	win_size;
+	t_rect		skip_rect;
 	uint32_t	*pixels;
 	t_config	config;
 	int			thread_count;

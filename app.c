@@ -57,7 +57,8 @@ int	keyup_event(int keycode, void *param)
 	if (keycode == KEY_MORE)
 		app->thread_count++;
 	if (keycode == KEY_LESS)
-		app->thread_count -= (app->thread_count != 0);
+		app->thread_count -= (app->thread_count != 1);
+	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS);
 	return 0;
 }
 
@@ -74,6 +75,8 @@ int	mouse_down(int button, int x, int y, void *param)
 		config_zoom_to(app, x, y);
 	if (button == 5)
 		config_dezoom_from(app, x, y);
+	app->need_full_redraw = (button == 4 || button == 5);
+
 	return 0;
 }
 
@@ -87,10 +90,6 @@ int	mouse_up(int button, int x, int y, void *param)
 	return 0;
 }
 
-typedef struct s_rect {
-	t_float2 origin;
-	t_float2 size;
-} t_rect;
 
 void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 {
@@ -137,7 +136,6 @@ int mouse_move(int x, int y, void *param)
 	new_pos = (t_float2){x, y};
 	delta = float2_sub(old_pos, new_pos);
 	old_pos = new_pos;
-
 	if (app->is_dragging)
 	{
 		t_rect src = {};
@@ -167,11 +165,15 @@ int mouse_move(int x, int y, void *param)
 			src.size.y = app->win_size.y - delta.y;
 			dst.origin.y = 0;
 		}
+		dst.size = src.size;
 		delta.x = (delta.x / app->win_size.x) * app->config.z_size.x;
 		delta.y = (delta.y / app->win_size.y) * app->config.z_size.y;
 		float2_add_this(&app->config.z_max, delta);
 		float2_add_this(&app->config.z_min, delta);
 		copy_region(src, dst, app->win_size, app->pixels);
+		app->skip_rect = dst;
+		app_draw(*app);
+		app->skip_rect = (t_rect){};
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
@@ -295,7 +297,8 @@ void	app_update(t_app *app)
 		float2_sub_this(&app->config.z_max, size);
 		app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
 	}
-	if (app->keystate[KEY_UP] || app->keystate[KEY_DOWN] || app->keystate[KEY_RIGHT] || app->keystate[KEY_LEFT])
+	if (app->keystate[KEY_UP] || app->keystate[KEY_DOWN] || app->keystate[KEY_RIGHT] || app->keystate[KEY_LEFT] ||
+	app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM] || app->keystate[KEY_PLUS] || app->keystate[KEY_LESS])
 		app->need_full_redraw = true;
 
 }
@@ -407,6 +410,11 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 }
 #endif
 
+bool	is_inside_rect(t_rect rect, int x, int y)
+{
+	return ((x > rect.origin.x) && (x < (rect.origin.x + rect.size.x)) && (y > rect.origin.y) && (y < rect.origin.y + rect.size.y));
+}
+
 void	app_draw(t_app app)
 {
 	int			x;
@@ -421,6 +429,11 @@ void	app_draw(t_app app)
 		c.y = (y / app.win_size.y) * (app.config.z_size.y) + (app.config.z_min.y);
 		while (x < app.win_size.x)
 		{
+			if (is_inside_rect(app.skip_rect, x, y))
+			{
+				x++;
+				continue;
+			}
 			c.x = (x / app.win_size.x) * (app.config.z_size.x) + (app.config.z_min.x);
 //			c.x = (x / app.win_size.x) * (app.config.z_max.x - app.config.z_min.x) + (app.config.z_min.x);
 			depth = get_mandelbrot_value(c, app.config.depth_max);
@@ -500,7 +513,6 @@ void	app_draw_parallel(t_app app)
 	int i;
 
 	thread_config thread_config_list[MAX_THREAD] = {};
-//	thread_config *thread_config_list = malloc(sizeof(thread_config) * app.thread_count);
 	pthread_t thread_list[MAX_THREAD] = {};
 	prepare_threads(app, thread_config_list);
 	i = 0;
@@ -516,7 +528,5 @@ void	app_draw_parallel(t_app app)
 		pthread_join(thread_list[i], NULL);
 		i++;
 	}
-
-//	free(thread_config_list);
 }
 
