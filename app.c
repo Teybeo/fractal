@@ -1,5 +1,7 @@
 #include "app.h"
 
+#include "drawing.h"
+
 #include <mlx.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -7,19 +9,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
-#include <pthread.h>
 
-t_config	config_init()
-{
-	t_config config;
-	config.depth_max = 100;
-//	config.z_min = (t_float2){-2, -2};
-//	config.z_max = (t_float2){2, 2};
-	config.z_min = (t_float2){-0.6, -0.};
-	config.z_max = (t_float2){-0.8, -0.2};
-	config.z_size = float2_sub(config.z_max, config.z_min);
-	return (config);
-}
 
 int	quit_event()
 {
@@ -30,8 +20,7 @@ int	quit_event()
 static unsigned long frame_counter;
 
 void	app_update(t_app *app);
-void config_zoom_to(t_app *app, int x, int y);
-void config_dezoom_from(t_app *app, int x, int y);
+void	app_draw_ui(t_app app);
 
 int	keydown_event(int keycode, void *param)
 {
@@ -72,9 +61,9 @@ int	mouse_down(int button, int x, int y, void *param)
 	if (button == 1)
 		app->is_dragging = true;
 	if (button == 4)
-		config_zoom_to(app, x, y);
+		config_zoom_to(&app->config, x, y);
 	if (button == 5)
-		config_dezoom_from(app, x, y);
+		config_dezoom_from(&app->config, x, y);
 	app->need_full_redraw = (button == 4 || button == 5);
 
 	return 0;
@@ -119,18 +108,13 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 	}
 }
 
-void	app_draw_parallel(t_app app)
-;
-
-void	app_draw_ui(t_app app)
-;
-
 int mouse_move(int x, int y, void *param)
 {
 	static t_float2	old_pos;
 	t_float2	new_pos;
 	t_float2	delta;
 	t_app		*app;
+	t_rect		skip_rect;
 
 	app = param;
 	new_pos = (t_float2){x, y};
@@ -140,105 +124,61 @@ int mouse_move(int x, int y, void *param)
 	{
 		t_rect src = {};
 		t_rect dst = {};
-		src.size = app->win_size;
+		src.size = app->config.win_size;
 		if (delta.x < 0)
 		{
 			src.origin.x = 0;
-			src.size.x = app->win_size.x + delta.x;
+			src.size.x = app->config.win_size.x + delta.x;
 			dst.origin.x = -delta.x;
 		}
 		else if (delta.x > 0)
 		{
 			src.origin.x = delta.x;
-			src.size.x = app->win_size.x - delta.x;
+			src.size.x = app->config.win_size.x - delta.x;
 			dst.origin.x = 0;
 		}
 		if (delta.y < 0)
 		{
 			src.origin.y = 0;
-			src.size.y = app->win_size.y + delta.y;
+			src.size.y = app->config.win_size.y + delta.y;
 			dst.origin.y = -delta.y;
 		}
 		else if (delta.y > 0)
 		{
 			src.origin.y = delta.y;
-			src.size.y = app->win_size.y - delta.y;
+			src.size.y = app->config.win_size.y - delta.y;
 			dst.origin.y = 0;
 		}
 		dst.size = src.size;
-		delta.x = (delta.x / app->win_size.x) * app->config.z_size.x;
-		delta.y = (delta.y / app->win_size.y) * app->config.z_size.y;
+		delta.x = (delta.x / app->config.win_size.x) * app->config.z_size.x;
+		delta.y = (delta.y / app->config.win_size.y) * app->config.z_size.y;
 		float2_add_this(&app->config.z_max, delta);
 		float2_add_this(&app->config.z_min, delta);
-		copy_region(src, dst, app->win_size, app->pixels);
-		app->skip_rect = dst;
-		app_draw(*app);
-		app->skip_rect = (t_rect){};
+		copy_region(src, dst, app->config.win_size, app->pixels);
+		skip_rect = dst;
+		app_partial_draw(app->config, skip_rect, app->pixels);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
 	return (0);
 }
 
-void config_zoom_to(t_app *app, int x, int y)
-{
-	t_float2 size;
-	t_float2 center_to_mouse;
-	t_float2 z_mouse;
-	t_float2 z_center;
-
-	z_mouse = (t_float2){x, y};
-	float2_remap(&z_mouse, app->win_size, app->config.z_size, app->config.z_min);
-	z_center = get_center(app->config.z_min, app->config.z_max);
-	size = float2_sub(app->config.z_max, app->config.z_min);
-	center_to_mouse = float2_sub(z_mouse, z_center);
-	center_to_mouse.x /= 2;
-	center_to_mouse.y /= 2;
-	size.x *= 0.25f;
-	size.y *= 0.25f;
-	float2_add_this(&app->config.z_min, size);
-	float2_sub_this(&app->config.z_max, size);
-	float2_add_this(&app->config.z_min, center_to_mouse);
-	float2_add_this(&app->config.z_max, center_to_mouse);
-	app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
-}
-
-void config_dezoom_from(t_app *app, int x, int y)
-{
-	t_float2 size;
-	t_float2 center_to_mouse;
-	t_float2 z_mouse;
-	t_float2 z_center;
-
-	z_mouse = (t_float2){x, y};
-	float2_remap(&z_mouse, app->win_size, app->config.z_size, app->config.z_min);
-	z_center = get_center(app->config.z_min, app->config.z_max);
-	size = float2_sub(app->config.z_max, app->config.z_min);
-	center_to_mouse = float2_sub(z_mouse, z_center);
-	center_to_mouse.x /= -1;
-	center_to_mouse.y /= -1;
-	size.x *= -0.5f;
-	size.y *= -0.5f;
-	float2_add_this(&app->config.z_min, size);
-	float2_sub_this(&app->config.z_max, size);
-	float2_add_this(&app->config.z_min, center_to_mouse);
-	float2_add_this(&app->config.z_max, center_to_mouse);
-	app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
-}
 
 void	app_init(t_app *app)
 {
 	int osef;
+	t_float2 win_size;
 
-	app->win_size = (t_float2){1000, 1000};
+	win_size = (t_float2){1000, 1000};
+	app->mlx_context = mlx_init();
+	app->config = config_init();
+	app->config.win_size = win_size;
 	app->thread_count = 1;
 	app->is_dragging = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
-	app->mlx_context = mlx_init();
-	app->config = config_init();
-	app->mlx_window = mlx_new_window(app->mlx_context, app->win_size.x, app->win_size.y, "Wireframe");
-	app->mlx_texture = mlx_new_image(app->mlx_context, app->win_size.x, app->win_size.y);
+	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Wireframe");
+	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
 	app->pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
@@ -253,8 +193,6 @@ void	app_init(t_app *app)
 }
 
 float get_frametime();
-void	app_draw_ui(t_app app);
-void	app_draw_parallel(t_app app);
 
 void	app_update(t_app *app)
 {
@@ -309,10 +247,10 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-//	app_draw(*app);
-	if (app->need_full_redraw)
+	app_partial_draw(app->config, (t_rect){}, app->pixels);
+	if (app->need_full_redraw & 0)
 	{
-		app_draw_parallel(*app);
+		app_draw_parallel(app->config, app->pixels, app->thread_count);
 		app->need_full_redraw = false;
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
@@ -355,178 +293,5 @@ float get_frametime()
 			+ (now.tv_nsec - start.tv_nsec) / 1000000.f;
 	start = now;
 	return (duration);
-}
-
-#if 1
-int	get_mandelbrot_value(t_float2 c, int depth_max)
-{
-	t_float2	z;
-//	t_float2	z_old;
-	int			depth;
-
-	depth = 0;
-	z = c;
-//	z_old = z;
-//	while (((z.x < 2 && z.x > -2) && (z.y < 2 && z.y > -2)) && (depth < depth_max))
-	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
-	{
-		float z_y_temp = 2 * z.x * z.y + c.y;
-//		z.y = 2 * z.x * z.y + c.y;
-//		z.x = z_squared.x - z_squared.y + c.x;
-		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
-		z.y = z_y_temp;
-		depth++;
-//		if (z.x == z_old.x && z.y == z_old.y)
-//		{
-//			depth = depth_max;
-//			break;
-//		}
-//		z_old = z;
-	}
-	if (depth == depth_max)
-		return (0);
-	return (depth);
-}
-#else
-int	get_mandelbrot_value(t_float2 c, int depth_max)
-{
-	t_float2	z;
-	t_float2	z_squared;
-	int			depth;
-
-	depth = 0;
-	z = (t_float2){};
-	z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	while (((z_squared.x + z_squared.y) < 4) && (depth < depth_max))
-	{
-		z.y = 2 * z.x * z.y + c.y;
-		z.x = z_squared.x - z_squared.y + c.x;
-		depth++;
-		z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	}
-	if (depth == depth_max)
-		return (0);
-	return (depth - 1);
-}
-#endif
-
-bool	is_inside_rect(t_rect rect, int x, int y)
-{
-	return ((x > rect.origin.x) && (x < (rect.origin.x + rect.size.x)) && (y > rect.origin.y) && (y < rect.origin.y + rect.size.y));
-}
-
-void	app_draw(t_app app)
-{
-	int			x;
-	int			y;
-	t_float2	c;
-	int			depth;
-
-	y = 0;
-	while (y < app.win_size.y)
-	{
-		x = 0;
-		c.y = (y / app.win_size.y) * (app.config.z_size.y) + (app.config.z_min.y);
-		while (x < app.win_size.x)
-		{
-			if (is_inside_rect(app.skip_rect, x, y))
-			{
-				x++;
-				continue;
-			}
-			c.x = (x / app.win_size.x) * (app.config.z_size.x) + (app.config.z_min.x);
-//			c.x = (x / app.win_size.x) * (app.config.z_max.x - app.config.z_min.x) + (app.config.z_min.x);
-			depth = get_mandelbrot_value(c, app.config.depth_max);
-			int channel = (255.f * (depth / (float)app.config.depth_max));
-			app.pixels[(int)(y * app.win_size.x + x)] = (0xFF & channel) << 8;
-			x++;
-		}
-		y++;
-	}
-}
-
-#define MAX_THREAD 16
-
-typedef struct thread_config {
-	t_config	config;
-	t_float2	win_size;
-	int			first_line;
-	int			last_line;
-	uint32_t	*pixels;
-	char		thread_id;
-} thread_config;
-
-void	prepare_threads(t_app app, thread_config *thread_list)
-{
-	int i;
-	i = 0;
-	while (i < app.thread_count)
-	{
-		thread_list[i].win_size = app.win_size;
-		thread_list[i].first_line = i * (app.win_size.y / app.thread_count);
-		thread_list[i].last_line = (i + 1) * (app.win_size.y / app.thread_count);
-		thread_list[i].config = app.config;
-		thread_list[i].pixels = app.pixels;
-		thread_list[i].thread_id = i;
-		i++;
-	}
-}
-
-void	*partial_draw(void *param)
-{
-	int				x;
-	int				y;
-	t_float2		c;
-	int				depth;
-	thread_config	conf;
-
-	conf = *(thread_config*)param;
-//	int pixel_id;
-//	float inv_x = 1.f / conf.win_size.x;
-//	float inv_y = 1 / conf.win_size.y;
-	y = conf.first_line;
-	while (y < conf.last_line)
-	{
-		x = 0;
-		c.y = (y / conf.win_size.y) * (conf.config.z_size.y) + (conf.config.z_min.y);
-//		c.y = (y * inv_y) * (conf.config.z_size.y) + (conf.config.z_min.y);
-//		pixel_id = y * conf.win_size.x;
-		while (x < conf.win_size.x)
-		{
-			c.x = (x / conf.win_size.x) * (conf.config.z_size.x) + (conf.config.z_min.x);
-//			c.x = (x * inv_x) * (conf.config.z_size.x) + (conf.config.z_min.x);
-//			c.x = (x / conf.win_size.x) * (conf.config.z_max.x - conf.config.z_min.x) + (conf.config.z_min.x);
-			depth = get_mandelbrot_value(c, conf.config.depth_max);
-			int channel = (255.f * (depth / (float)conf.config.depth_max));
-			conf.pixels[(int)(y * conf.win_size.x + x)] = (0xFF & channel) << 8;
-//			conf.pixels[(int)(y * conf.win_size.x + x)] |= (0xFF & conf.thread_id * 16) << 16;
-			x++;
-		}
-		y++;
-	}
-	return NULL;
-}
-
-
-void	app_draw_parallel(t_app app)
-{
-	int i;
-
-	thread_config thread_config_list[MAX_THREAD] = {};
-	pthread_t thread_list[MAX_THREAD] = {};
-	prepare_threads(app, thread_config_list);
-	i = 0;
-	while (i < app.thread_count)
-	{
-		pthread_create(thread_list + i, NULL, partial_draw, thread_config_list + i);
-		i++;
-	}
-
-	i = 0;
-	while (i < app.thread_count)
-	{
-		pthread_join(thread_list[i], NULL);
-		i++;
-	}
 }
 

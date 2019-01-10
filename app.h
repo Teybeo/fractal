@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/01/09 14:38:44 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/10 17:04:00 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define APP_H
 
 # include "t_float2.h"
+# include "config.h"
 
 # include <stdint.h>
 # include <stdbool.h>
@@ -35,27 +36,13 @@ enum	e_key
 	KEY_LAST = 512
 };
 
-struct	s_config
-{
-	int			depth_max;
-	t_float2	z_min;
-	t_float2	z_max;
-	t_float2	z_size;
-};
-typedef struct s_config	t_config;
 
-typedef struct s_rect {
-	t_float2 origin;
-	t_float2 size;
-} t_rect;
 
 struct	s_app
 {
 	void		*mlx_context;
 	void		*mlx_texture;
 	void		*mlx_window;
-	t_float2	win_size;
-	t_rect		skip_rect;
 	uint32_t	*pixels;
 	t_config	config;
 	int			thread_count;
@@ -66,7 +53,6 @@ struct	s_app
 typedef struct s_app	t_app;
 
 void	app_init(t_app *app);
-void	app_draw(t_app app);
 t_app	app_run();
 int		app_callback(void *param);
 
