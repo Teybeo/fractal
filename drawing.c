@@ -121,7 +121,7 @@ void	*draw_task(void *param)
 			depth = get_mandelbrot_value(c, conf.config.depth_max);
 			int channel = (255.f * (depth / (float)conf.config.depth_max));
 			conf.pixels[(int)(y * conf.win_size.x + x)] = (0xFF & channel) << 8;
-//			conf.pixels[(int)(y * conf.win_size.x + x)] |= (0xFF & conf.thread_id * 16) << 16;
+			conf.pixels[(int)(y * conf.win_size.x + x)] |= (0xFF & conf.thread_id * 16) << 16;
 			x++;
 		}
 		y++;

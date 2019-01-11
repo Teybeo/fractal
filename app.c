@@ -108,13 +108,16 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 	}
 }
 
+
+void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels)
+;
+
 int mouse_move(int x, int y, void *param)
 {
 	static t_float2	old_pos;
 	t_float2	new_pos;
 	t_float2	delta;
 	t_app		*app;
-	t_rect		skip_rect;
 
 	app = param;
 	new_pos = (t_float2){x, y};
@@ -122,45 +125,52 @@ int mouse_move(int x, int y, void *param)
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
-		t_rect src = {};
-		t_rect dst = {};
-		src.size = app->config.win_size;
-		if (delta.x < 0)
-		{
-			src.origin.x = 0;
-			src.size.x = app->config.win_size.x + delta.x;
-			dst.origin.x = -delta.x;
-		}
-		else if (delta.x > 0)
-		{
-			src.origin.x = delta.x;
-			src.size.x = app->config.win_size.x - delta.x;
-			dst.origin.x = 0;
-		}
-		if (delta.y < 0)
-		{
-			src.origin.y = 0;
-			src.size.y = app->config.win_size.y + delta.y;
-			dst.origin.y = -delta.y;
-		}
-		else if (delta.y > 0)
-		{
-			src.origin.y = delta.y;
-			src.size.y = app->config.win_size.y - delta.y;
-			dst.origin.y = 0;
-		}
-		dst.size = src.size;
-		delta.x = (delta.x / app->config.win_size.x) * app->config.z_size.x;
-		delta.y = (delta.y / app->config.win_size.y) * app->config.z_size.y;
-		float2_add_this(&app->config.z_max, delta);
-		float2_add_this(&app->config.z_min, delta);
-		copy_region(src, dst, app->config.win_size, app->pixels);
-		skip_rect = dst;
-		app_partial_draw(app->config, skip_rect, app->pixels);
+		delta_draw(delta, &app->config, app->pixels);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
 	return (0);
+}
+
+void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels)
+{
+	t_rect	src = {};
+	t_rect	dst = {};
+	t_rect	skip_rect;
+
+	src.size = config->win_size;
+	if (delta.x < 0)
+	{
+		src.origin.x = 0;
+		src.size.x = config->win_size.x + delta.x;
+		dst.origin.x = -delta.x;
+	}
+	else if (delta.x > 0)
+	{
+		src.origin.x = delta.x;
+		src.size.x = config->win_size.x - delta.x;
+		dst.origin.x = 0;
+	}
+	if (delta.y < 0)
+	{
+		src.origin.y = 0;
+		src.size.y = config->win_size.y + delta.y;
+		dst.origin.y = -delta.y;
+	}
+	else if (delta.y > 0)
+	{
+		src.origin.y = delta.y;
+		src.size.y = config->win_size.y - delta.y;
+		dst.origin.y = 0;
+	}
+	dst.size = src.size;
+	delta.x = (delta.x / config->win_size.x) * config->z_size.x;
+	delta.y = (delta.y / config->win_size.y) * config->z_size.y;
+	float2_add_this(&config->z_max, delta);
+	float2_add_this(&config->z_min, delta);
+	copy_region(src, dst, config->win_size, pixels);
+	skip_rect = dst;
+	app_partial_draw(*config, skip_rect, pixels);
 }
 
 
@@ -199,17 +209,15 @@ void	app_update(t_app *app)
 	t_float2	delta;
 	delta = (t_float2){};
 
-	if (app->keystate[KEY_UP])
-		delta.y -= 0.02f * app->config.z_size.y;
-	if (app->keystate[KEY_DOWN])
-		delta.y += 0.02f * app->config.z_size.y;
-	if (app->keystate[KEY_RIGHT])
-		delta.x += 0.02f * app->config.z_size.x;
-	if (app->keystate[KEY_LEFT])
-		delta.x -= 0.02f * app->config.z_size.x;
+	delta.y -= app->keystate[KEY_UP];
+	delta.y += app->keystate[KEY_DOWN];
+	delta.x += app->keystate[KEY_RIGHT];
+	delta.x -= app->keystate[KEY_LEFT];
 
-	float2_add_this(&app->config.z_min, delta);
-	float2_add_this(&app->config.z_max, delta);
+	delta.x *= 4;
+	delta.y *= 4;
+
+	delta_draw(delta, &app->config, app->pixels);
 
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
@@ -235,8 +243,10 @@ void	app_update(t_app *app)
 		float2_sub_this(&app->config.z_max, size);
 		app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
 	}
-	if (app->keystate[KEY_UP] || app->keystate[KEY_DOWN] || app->keystate[KEY_RIGHT] || app->keystate[KEY_LEFT] ||
-	app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM] || app->keystate[KEY_PLUS] || app->keystate[KEY_LESS])
+	if (
+//			app->keystate[KEY_UP] || app->keystate[KEY_DOWN] || app->keystate[KEY_RIGHT] || app->keystate[KEY_LEFT] ||
+	app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM] || app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS]
+	)
 		app->need_full_redraw = true;
 
 }
@@ -247,8 +257,8 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-	app_partial_draw(app->config, (t_rect){}, app->pixels);
-	if (app->need_full_redraw & 0)
+//	app_partial_draw(app->config, (t_rect){}, app->pixels);
+	if (app->need_full_redraw)
 	{
 		app_draw_parallel(app->config, app->pixels, app->thread_count);
 		app->need_full_redraw = false;

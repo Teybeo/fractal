@@ -13,7 +13,9 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCE_FILES
         main.c
         app.c
-        t_float2.c)
+        t_float2.c
+        drawing.c
+        config.c)
 
 add_executable(fractol ${SOURCE_FILES})
 target_link_libraries(fractol mlx)
