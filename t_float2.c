@@ -19,6 +19,12 @@ void		float2_sub_this(t_float2 *this, t_float2 b)
 	this->y -= b.y;
 }
 
+void		float2_mul_this(t_float2 *this, float x)
+{
+	this->x *= x;
+	this->y *= x;
+}
+
 /*
 * The source space origin is ommited as it is assumed to be (0, 0)
 */

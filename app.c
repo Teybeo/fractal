@@ -197,40 +197,20 @@ void	app_update(t_app *app)
 	delta.y += app->keystate[KEY_DOWN];
 	delta.x += app->keystate[KEY_RIGHT];
 	delta.x -= app->keystate[KEY_LEFT];
-
 	delta.x *= 4;
 	delta.y *= 4;
-
 	delta_draw(delta, &app->config, app->surface);
-
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
 	if (app->keystate[KEY_MINUS])
 		app->config.depth_max -= 10 * ((app->config.depth_max - 10) >= 0);
 	if (app->keystate[KEY_ZOOM])
-	{
-		t_float2 size;
-		size = float2_sub(app->config.z_max, app->config.z_min);
-		size.x *= 0.25f;
-		size.y *= 0.25f;
-		float2_add_this(&app->config.z_min, size);
-		float2_sub_this(&app->config.z_max, size);
-		app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
-	}
+		config_zoom_factor(&app->config, 0.25f);
 	if (app->keystate[KEY_DEZOOM])
-	{
-		t_float2 size;
-		size = float2_sub(app->config.z_max, app->config.z_min);
-		size.x *= -0.5f;
-		size.y *= -0.5f;
-		float2_add_this(&app->config.z_min, size);
-		float2_sub_this(&app->config.z_max, size);
-		app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
-	}
+		config_zoom_factor(&app->config, -0.5f);
 	if (app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM]
 	|| app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS])
 		app->need_full_redraw = true;
-
 }
 
 int		app_callback(void *param)

@@ -19,6 +19,17 @@ t_rect	config_fast_move(t_config *config, t_float2 delta)
 	return (skip_rect);
 }
 
+void config_zoom_factor(t_config *config, float factor)
+{
+	t_float2	size;
+
+	size = float2_sub(config->z_max, config->z_min);
+	float2_mul_this(&size, factor);
+	float2_add_this(&config->z_min, size);
+	float2_sub_this(&config->z_max, size);
+	config->z_size = float2_sub(config->z_max, config->z_min);
+}
+
 void config_zoom_to(t_config *config, int x, int y, t_float2 win_size)
 {
 	t_float2 size;
