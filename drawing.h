@@ -7,11 +7,6 @@
 
 #define MAX_THREAD 16
 
-typedef struct s_rect {
-	t_float2 origin;
-	t_float2 size;
-} t_rect;
-
 typedef struct thread_config {
 	t_config	config;
 	t_float2	win_size;
@@ -21,7 +16,14 @@ typedef struct thread_config {
 	char		thread_id;
 } thread_config;
 
-void	app_draw_parallel(t_config config, uint32_t *pixels, int thread_count);
-void	app_partial_draw(t_config config, t_rect skip_rect, uint32_t  *pixels);
+struct	s_surface
+{
+	uint32_t	*pixels;
+	t_float2	size;
+};
+typedef struct s_surface	t_surface;
+
+void	app_draw_parallel(t_config config, t_surface pixels, int thread_count);
+void	app_partial_draw(t_config config, t_rect skip_rect, t_surface surface);
 
 #endif

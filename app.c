@@ -62,9 +62,9 @@ int	mouse_down(int button, int x, int y, void *param)
 	if (button == 1)
 		app->is_dragging = true;
 	if (button == 4)
-		config_zoom_to(&app->config, x, y);
+		config_zoom_to(&app->config, x, y, app->surface.size);
 	if (button == 5)
-		config_dezoom_from(&app->config, x, y);
+		config_dezoom_from(&app->config, x, y, app->surface.size);
 	app->need_full_redraw = (button == 4 || button == 5);
 
 	return 0;
@@ -74,50 +74,44 @@ int	mouse_up(int button, int x, int y, void *param)
 {
 	t_app *app;
 
+	x++;
+	y++;
 	app = param;
 	if (button == 1)
 		app->is_dragging = false;
 	return 0;
 }
 
-void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
+void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface surface)
 {
-	if ((dst.origin.y > src.origin.y) || ((dst.origin.y == src.origin.y) && (dst.origin.x > src.origin.y)))
+	if ((dst.y > src.y) || ((dst.y == src.y) && (dst.x > src.y)))
 	{
-		for (int y = src.size.y - 1; y >= 0; --y)
+		for (int y = region_size.y - 1; y >= 0; --y)
 		{
-			for (int x = src.size.x - 1; x >= 0; --x)
+			for (int x = region_size.x - 1; x >= 0; --x)
 			{
-				int src_index = (int) ((src.origin.y + y) * bounds.x + src.origin.x + x);
-				int dst_index = (int) ((dst.origin.y + y) * bounds.x + dst.origin.x + x);
-				assert(src_index >= 0);
-				assert(src_index < (bounds.x * bounds.y));
-				assert(dst_index >= 0);
-				assert(dst_index < (bounds.x * bounds.y));
-				data[dst_index] = data[src_index];
+				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
+				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
+				surface.pixels[dst_index] = surface.pixels[src_index];
 			}
 		}
 	}
 	else
 	{
-		for (int y = 0; y < src.size.y; ++y)
+		for (int y = 0; y < region_size.y; ++y)
 		{
-			for (int x = 0; x < src.size.x; ++x)
+			for (int x = 0; x < region_size.x; ++x)
 			{
-				int src_index = (int) ((src.origin.y + y) * bounds.x + src.origin.x + x);
-				int dst_index = (int) ((dst.origin.y + y) * bounds.x + dst.origin.x + x);
-				assert(src_index >= 0);
-				assert(src_index < (bounds.x * bounds.y));
-				assert(dst_index >= 0);
-				assert(dst_index < (bounds.x * bounds.y));
-				data[dst_index] = data[src_index];
+				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
+				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
+				surface.pixels[dst_index] = surface.pixels[src_index];
 			}
 		}
 	}
 }
 
 
-void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels);
+void delta_draw(t_float2 delta, t_config *config, t_surface surface);
 
 int mouse_move(int x, int y, void *param)
 {
@@ -132,54 +126,54 @@ int mouse_move(int x, int y, void *param)
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
-		delta_draw(delta, &app->config, app->pixels);
+		delta_draw(delta, &app->config, app->surface);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
 	return (0);
 }
 
-void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels)
+void delta_draw(t_float2 delta, t_config *config, t_surface surface)
 {
-	t_rect	src = {};
-	t_rect	dst = {};
-	t_rect	skip_rect;
+	t_float2	src = {};
+	t_float2	dst = {};
+	t_rect		skip_rect;
 	t_float2	region_size;
 
-	src.size = config->win_size;
-	region_size = config->win_size;
-
-	src.origin.x = (delta.x >= 0) ? delta.x : 0;
-	src.origin.y = (delta.y >= 0) ? delta.y : 0;
-	dst.origin.x = (delta.x >= 0) ? 0 : -delta.x;
-	dst.origin.y = (delta.y >= 0) ? 0 : -delta.y;
+	region_size = surface.size;
+	src.x = (delta.x >= 0) ? delta.x : 0;
+	src.y = (delta.y >= 0) ? delta.y : 0;
+	dst.x = (delta.x >= 0) ? 0 : -delta.x;
+	dst.y = (delta.y >= 0) ? 0 : -delta.y;
 	region_size.x -= fabsf(delta.x);
 	region_size.y -= fabsf(delta.y);
-	src.size = region_size;
-	dst.size = region_size;
-	delta.x = (delta.x / config->win_size.x) * config->z_size.x;
-	delta.y = (delta.y / config->win_size.y) * config->z_size.y;
+	delta.x = (delta.x / surface.size.x) * config->z_size.x;
+	delta.y = (delta.y / surface.size.y) * config->z_size.y;
 	float2_add_this(&config->z_max, delta);
 	float2_add_this(&config->z_min, delta);
-	copy_region(src, dst, config->win_size, pixels);
-	skip_rect = dst;
-	app_partial_draw(*config, skip_rect, pixels);
+	copy_region(src, dst, region_size, surface);
+	skip_rect.origin = dst;
+	skip_rect.size = region_size;
+	app_partial_draw(*config, skip_rect, surface);
 }
 
 
 void	app_init(t_app *app)
 {
-	int osef;
+	int			osef;
+	t_float2	win_size;
 
+	win_size = (t_float2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init();
 	app->thread_count = 1;
 	app->is_dragging = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
-	app->mlx_window = mlx_new_window(app->mlx_context, app->config.win_size.x, app->config.win_size.y, "Wireframe");
-	app->mlx_texture = mlx_new_image(app->mlx_context, app->config.win_size.x, app->config.win_size.y);
-	app->pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
+	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Wireframe");
+	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
+	app->surface.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
+	app->surface.size = win_size;
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
 	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
@@ -207,7 +201,7 @@ void	app_update(t_app *app)
 	delta.x *= 4;
 	delta.y *= 4;
 
-	delta_draw(delta, &app->config, app->pixels);
+	delta_draw(delta, &app->config, app->surface);
 
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
@@ -248,7 +242,7 @@ int		app_callback(void *param)
 //	app_partial_draw(app->config, (t_rect){}, app->pixels);
 	if (app->need_full_redraw)
 	{
-		app_draw_parallel(app->config, app->pixels, app->thread_count);
+		app_draw_parallel(app->config, app->surface, app->thread_count);
 		app->need_full_redraw = false;
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);

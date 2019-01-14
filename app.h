@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/01/10 17:04:00 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/14 21:41:24 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "t_float2.h"
 # include "config.h"
+#include "drawing.h"
 
 # include <stdint.h>
 # include <stdbool.h>
@@ -36,14 +37,12 @@ enum	e_key
 	KEY_LAST = 512
 };
 
-
-
 struct	s_app
 {
 	void		*mlx_context;
 	void		*mlx_texture;
 	void		*mlx_window;
-	uint32_t	*pixels;
+	t_surface	surface;
 	t_config	config;
 	int			thread_count;
 	bool		keystate[KEY_LAST];

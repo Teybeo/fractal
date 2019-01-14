@@ -9,12 +9,17 @@ t_config	config_init()
 	config.z_min = (t_float2){-0.6, -0.};
 	config.z_max = (t_float2){-0.8, -0.2};
 	config.z_size = float2_sub(config.z_max, config.z_min);
-	config.win_size = (t_float2){1000, 1000};
 	return (config);
 }
 
+t_rect	config_fast_move(t_config *config, t_float2 delta)
+{
+	t_rect	skip_rect;
 
-void config_zoom_to(t_config *config, int x, int y)
+	return (skip_rect);
+}
+
+void config_zoom_to(t_config *config, int x, int y, t_float2 win_size)
 {
 	t_float2 size;
 	t_float2 center_to_mouse;
@@ -22,7 +27,7 @@ void config_zoom_to(t_config *config, int x, int y)
 	t_float2 z_center;
 
 	z_mouse = (t_float2){x, y};
-	float2_remap(&z_mouse, config->win_size, config->z_size, config->z_min);
+	float2_remap(&z_mouse, win_size, config->z_size, config->z_min);
 	z_center = get_center(config->z_min, config->z_max);
 	size = float2_sub(config->z_max, config->z_min);
 	center_to_mouse = float2_sub(z_mouse, z_center);
@@ -37,7 +42,7 @@ void config_zoom_to(t_config *config, int x, int y)
 	config->z_size = float2_sub(config->z_max, config->z_min);
 }
 
-void config_dezoom_from(t_config *config, int x, int y)
+void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size)
 {
 	t_float2 size;
 	t_float2 center_to_mouse;
@@ -45,7 +50,7 @@ void config_dezoom_from(t_config *config, int x, int y)
 	t_float2 z_center;
 
 	z_mouse = (t_float2){x, y};
-	float2_remap(&z_mouse, config->win_size, config->z_size, config->z_min);
+	float2_remap(&z_mouse, win_size, config->z_size, config->z_min);
 	z_center = get_center(config->z_min, config->z_max);
 	size = float2_sub(config->z_max, config->z_min);
 	center_to_mouse = float2_sub(z_mouse, z_center);

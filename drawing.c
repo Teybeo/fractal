@@ -1,4 +1,5 @@
 #include "drawing.h"
+#include "app.h"
 
 #include <pthread.h>
 #include <stdbool.h>
@@ -62,7 +63,7 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 #endif
 
 
-void	app_partial_draw(t_config config, t_rect skip_rect, uint32_t  *pixels)
+void	app_partial_draw(t_config config, t_rect skip_rect, t_surface surface)
 {
 	int			x;
 	int			y;
@@ -70,22 +71,22 @@ void	app_partial_draw(t_config config, t_rect skip_rect, uint32_t  *pixels)
 	int			depth;
 
 	y = 0;
-	while (y < config.win_size.y)
+	while (y < surface.size.y)
 	{
 		x = 0;
-		c.y = (y / config.win_size.y) * (config.z_size.y) + (config.z_min.y);
-		while (x < config.win_size.x)
+		c.y = (y / surface.size.y) * (config.z_size.y) + (config.z_min.y);
+		while (x < surface.size.x)
 		{
 			if (is_inside_rect(skip_rect, x, y))
 			{
 				x++;
 				continue;
 			}
-			c.x = (x / config.win_size.x) * (config.z_size.x) + (config.z_min.x);
-//			c.x = (x / config.win_size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
+			c.x = (x / surface.size.x) * (config.z_size.x) + (config.z_min.x);
+//			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
 			depth = get_mandelbrot_value(c, config.depth_max);
 			int channel = (255.f * (depth / (float)config.depth_max));
-			pixels[(int)(y * config.win_size.x + x)] = (0xFF & channel) << 8;
+			surface.pixels[(int)(y * surface.size.x + x)] = (0xFF & channel) << 8;
 			x++;
 		}
 		y++;
@@ -129,30 +130,30 @@ void	*draw_task(void *param)
 	return NULL;
 }
 
-void	prepare_threads(t_config config, uint32_t *pixels, thread_config *thread_list, int thread_count)
+void	prepare_threads(t_config config, t_surface surface, thread_config *thread_list, int thread_count)
 {
 	int i;
 	i = 0;
 	while (i < thread_count)
 	{
-		thread_list[i].win_size = config.win_size;
-		thread_list[i].first_line = i * (config.win_size.y / thread_count);
-		thread_list[i].last_line = (i + 1) * (config.win_size.y / thread_count);
+		thread_list[i].win_size = surface.size;
+		thread_list[i].first_line = i * (surface.size.y / thread_count);
+		thread_list[i].last_line = (i + 1) * (surface.size.y / thread_count);
 		thread_list[i].config = config;
-		thread_list[i].pixels = pixels;
+		thread_list[i].pixels = surface.pixels;
 		thread_list[i].thread_id = i;
 		i++;
 	}
 }
 
 
-void	app_draw_parallel(t_config config, uint32_t *pixels, int thread_count)
+void	app_draw_parallel(t_config config, t_surface surface, int thread_count)
 {
 	int i;
 
 	thread_config thread_config_list[MAX_THREAD] = {};
 	pthread_t thread_list[MAX_THREAD] = {};
-	prepare_threads(config, pixels, thread_config_list, thread_count);
+	prepare_threads(config, surface, thread_config_list, thread_count);
 	i = 0;
 	while (i < thread_count)
 	{
