@@ -9,6 +9,7 @@ t_config	config_init()
 	config.z_min = (t_float2){-0.6, -0.};
 	config.z_max = (t_float2){-0.8, -0.2};
 	config.z_size = float2_sub(config.z_max, config.z_min);
+	config.win_size = (t_float2){1000, 1000};
 	return (config);
 }
 

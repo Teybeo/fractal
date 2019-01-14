@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
+#include <assert.h>
 
 
 int	quit_event()
@@ -47,7 +48,7 @@ int	keyup_event(int keycode, void *param)
 		app->thread_count++;
 	if (keycode == KEY_LESS)
 		app->thread_count -= (app->thread_count != 1);
-	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS);
+	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS || keycode == KEY_R);
 	return 0;
 }
 
@@ -79,7 +80,6 @@ int	mouse_up(int button, int x, int y, void *param)
 	return 0;
 }
 
-
 void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 {
 	if ((dst.origin.y > src.origin.y) || ((dst.origin.y == src.origin.y) && (dst.origin.x > src.origin.y)))
@@ -90,6 +90,10 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 			{
 				int src_index = (int) ((src.origin.y + y) * bounds.x + src.origin.x + x);
 				int dst_index = (int) ((dst.origin.y + y) * bounds.x + dst.origin.x + x);
+				assert(src_index >= 0);
+				assert(src_index < (bounds.x * bounds.y));
+				assert(dst_index >= 0);
+				assert(dst_index < (bounds.x * bounds.y));
 				data[dst_index] = data[src_index];
 			}
 		}
@@ -102,6 +106,10 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 			{
 				int src_index = (int) ((src.origin.y + y) * bounds.x + src.origin.x + x);
 				int dst_index = (int) ((dst.origin.y + y) * bounds.x + dst.origin.x + x);
+				assert(src_index >= 0);
+				assert(src_index < (bounds.x * bounds.y));
+				assert(dst_index >= 0);
+				assert(dst_index < (bounds.x * bounds.y));
 				data[dst_index] = data[src_index];
 			}
 		}
@@ -109,8 +117,7 @@ void	copy_region(t_rect src, t_rect dst, t_float2 bounds, uint32_t *data)
 }
 
 
-void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels)
-;
+void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels);
 
 int mouse_move(int x, int y, void *param)
 {
@@ -137,33 +144,19 @@ void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels)
 	t_rect	src = {};
 	t_rect	dst = {};
 	t_rect	skip_rect;
+	t_float2	region_size;
 
 	src.size = config->win_size;
-	if (delta.x < 0)
-	{
-		src.origin.x = 0;
-		src.size.x = config->win_size.x + delta.x;
-		dst.origin.x = -delta.x;
-	}
-	else if (delta.x > 0)
-	{
-		src.origin.x = delta.x;
-		src.size.x = config->win_size.x - delta.x;
-		dst.origin.x = 0;
-	}
-	if (delta.y < 0)
-	{
-		src.origin.y = 0;
-		src.size.y = config->win_size.y + delta.y;
-		dst.origin.y = -delta.y;
-	}
-	else if (delta.y > 0)
-	{
-		src.origin.y = delta.y;
-		src.size.y = config->win_size.y - delta.y;
-		dst.origin.y = 0;
-	}
-	dst.size = src.size;
+	region_size = config->win_size;
+
+	src.origin.x = (delta.x >= 0) ? delta.x : 0;
+	src.origin.y = (delta.y >= 0) ? delta.y : 0;
+	dst.origin.x = (delta.x >= 0) ? 0 : -delta.x;
+	dst.origin.y = (delta.y >= 0) ? 0 : -delta.y;
+	region_size.x -= fabsf(delta.x);
+	region_size.y -= fabsf(delta.y);
+	src.size = region_size;
+	dst.size = region_size;
 	delta.x = (delta.x / config->win_size.x) * config->z_size.x;
 	delta.y = (delta.y / config->win_size.y) * config->z_size.y;
 	float2_add_this(&config->z_max, delta);
@@ -177,18 +170,15 @@ void delta_draw(t_float2 delta, t_config *config, uint32_t *pixels)
 void	app_init(t_app *app)
 {
 	int osef;
-	t_float2 win_size;
 
-	win_size = (t_float2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init();
-	app->config.win_size = win_size;
 	app->thread_count = 1;
 	app->is_dragging = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
-	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Wireframe");
-	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
+	app->mlx_window = mlx_new_window(app->mlx_context, app->config.win_size.x, app->config.win_size.y, "Wireframe");
+	app->mlx_texture = mlx_new_image(app->mlx_context, app->config.win_size.x, app->config.win_size.y);
 	app->pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
@@ -243,10 +233,8 @@ void	app_update(t_app *app)
 		float2_sub_this(&app->config.z_max, size);
 		app->config.z_size = float2_sub(app->config.z_max, app->config.z_min);
 	}
-	if (
-//			app->keystate[KEY_UP] || app->keystate[KEY_DOWN] || app->keystate[KEY_RIGHT] || app->keystate[KEY_LEFT] ||
-	app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM] || app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS]
-	)
+	if (app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM]
+	|| app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS])
 		app->need_full_redraw = true;
 
 }

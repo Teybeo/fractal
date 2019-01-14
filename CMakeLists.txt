@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.12)
 project(fractol C)
 
-add_compile_options(-Wall -Wextra)
-#add_compile_options(-Wall -Wextra -fsanitize=address -g3)
+#add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -fsanitize=address -g3)
 
-#link_libraries(-fsanitize=address -g3)
+link_libraries(-fsanitize=address -g3)
 
-#set(CMAKE_C_FLAGS_RELEASE "-O2 -ffast-math -flto -march=native")
+set(CMAKE_C_FLAGS_RELEASE "-O2 -ffast-math -flto -march=native")
 
 set(CMAKE_C_STANDARD 99)
 
