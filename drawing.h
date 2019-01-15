@@ -12,18 +12,20 @@ typedef struct thread_config {
 	t_float2	win_size;
 	int			first_line;
 	int			last_line;
-	uint32_t	*pixels;
+	uint16_t	*pixels;
 	char		thread_id;
 } thread_config;
 
-struct	s_surface
+
+
+struct	s_surface16
 {
-	uint32_t	*pixels;
+	uint16_t	*iter;
 	t_float2	size;
 };
-typedef struct s_surface	t_surface;
+typedef struct s_surface16	t_surface16;
 
-void	app_draw_parallel(t_config config, t_surface pixels, int thread_count);
-void	app_partial_draw(t_config config, t_rect skip_rect, t_surface surface);
+void	app_draw_parallel(t_config config, t_surface16 iter_frame, int thread_count);
+void	app_partial_draw(t_config config, t_rect skip_rect, t_surface16 iter_frame);
 
 #endif

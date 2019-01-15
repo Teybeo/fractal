@@ -22,8 +22,9 @@ static unsigned long frame_counter;
 
 void	app_update(t_app *app);
 void	app_draw_ui(t_app app);
+void	delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame);
 
-int	keydown_event(int keycode, void *param)
+int	 keydown_event(int keycode, void *param)
 {
 	t_app *app;
 
@@ -82,7 +83,7 @@ int	mouse_up(int button, int x, int y, void *param)
 	return 0;
 }
 
-void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface surface)
+void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface)
 {
 	if ((dst.y > src.y) || ((dst.y == src.y) && (dst.x > src.y)))
 	{
@@ -92,7 +93,7 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface sur
 			{
 				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
 				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
-				surface.pixels[dst_index] = surface.pixels[src_index];
+				surface.iter[dst_index] = surface.iter[src_index];
 			}
 		}
 	}
@@ -104,14 +105,12 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface sur
 			{
 				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
 				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
-				surface.pixels[dst_index] = surface.pixels[src_index];
+				surface.iter[dst_index] = surface.iter[src_index];
 			}
 		}
 	}
 }
 
-
-void delta_draw(t_float2 delta, t_config *config, t_surface surface);
 
 int mouse_move(int x, int y, void *param)
 {
@@ -126,35 +125,36 @@ int mouse_move(int x, int y, void *param)
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
-		delta_draw(delta, &app->config, app->surface);
+		delta_draw(delta, &app->config, app->iter_buffer);
+		app_render_colors(app->surface, app->iter_buffer, app->config);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
 	return (0);
 }
 
-void delta_draw(t_float2 delta, t_config *config, t_surface surface)
+void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 {
 	t_float2	src = {};
 	t_float2	dst = {};
 	t_rect		skip_rect;
 	t_float2	region_size;
 
-	region_size = surface.size;
+	region_size = iter_frame.size;
 	src.x = (delta.x >= 0) ? delta.x : 0;
 	src.y = (delta.y >= 0) ? delta.y : 0;
 	dst.x = (delta.x >= 0) ? 0 : -delta.x;
 	dst.y = (delta.y >= 0) ? 0 : -delta.y;
 	region_size.x -= fabsf(delta.x);
 	region_size.y -= fabsf(delta.y);
-	delta.x = (delta.x / surface.size.x) * config->z_size.x;
-	delta.y = (delta.y / surface.size.y) * config->z_size.y;
+	delta.x = (delta.x / iter_frame.size.x) * config->z_size.x;
+	delta.y = (delta.y / iter_frame.size.y) * config->z_size.y;
 	float2_add_this(&config->z_max, delta);
 	float2_add_this(&config->z_min, delta);
-	copy_region(src, dst, region_size, surface);
+	copy_region(src, dst, region_size, iter_frame);
 	skip_rect.origin = dst;
 	skip_rect.size = region_size;
-	app_partial_draw(*config, skip_rect, surface);
+	app_partial_draw(*config, skip_rect, iter_frame);
 }
 
 
@@ -174,6 +174,8 @@ void	app_init(t_app *app)
 	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
 	app->surface.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
 	app->surface.size = win_size;
+	app->iter_buffer.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
+	app->iter_buffer.size = win_size;
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
 	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
@@ -199,7 +201,8 @@ void	app_update(t_app *app)
 	delta.x -= app->keystate[KEY_LEFT];
 	delta.x *= 4;
 	delta.y *= 4;
-	delta_draw(delta, &app->config, app->surface);
+	delta_draw(delta, &app->config, app->iter_buffer);
+	app_render_colors(app->surface, app->iter_buffer, app->config);
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
 	if (app->keystate[KEY_MINUS])
@@ -222,7 +225,8 @@ int		app_callback(void *param)
 //	app_partial_draw(app->config, (t_rect){}, app->pixels);
 	if (app->need_full_redraw)
 	{
-		app_draw_parallel(app->config, app->surface, app->thread_count);
+		app_draw_parallel(app->config, app->iter_buffer, app->thread_count);
+		app_render_colors(app->surface, app->iter_buffer, app->config);
 		app->need_full_redraw = false;
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);

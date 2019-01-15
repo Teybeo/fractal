@@ -15,7 +15,7 @@ set(SOURCE_FILES
         app.c
         t_float2.c
         drawing.c
-        config.c)
+        config.c coloring.c coloring.h)
 
 add_executable(fractol ${SOURCE_FILES})
 target_link_libraries(fractol mlx)
