@@ -11,7 +11,6 @@
 #include <math.h>
 #include <assert.h>
 
-
 int	quit_event()
 {
 	printf("Bye");
@@ -44,7 +43,7 @@ int	keyup_event(int keycode, void *param)
 	if (keycode == KEY_ESCAPE)
 		exit(0);
 	if (keycode == KEY_R)
-		app->config = config_init();
+		app->config = config_init(app->surface.size);
 	if (keycode == KEY_MORE)
 		app->thread_count++;
 	if (keycode == KEY_LESS)
@@ -164,9 +163,10 @@ void	app_init(t_app *app)
 	t_float2	win_size;
 
 	win_size = (t_float2){1000, 1000};
+//	win_size = (t_float2){2560, 1440};
 	app->mlx_context = mlx_init();
-	app->config = config_init();
-	app->thread_count = 1;
+	app->config = config_init(win_size);
+	app->thread_count = 8;
 	app->is_dragging = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
@@ -176,6 +176,7 @@ void	app_init(t_app *app)
 	app->surface.size = win_size;
 	app->iter_buffer.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
 	app->iter_buffer.size = win_size;
+	memset(app->iter_buffer.iter, 0, sizeof(uint16_t) * win_size.x * win_size.y);
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
 	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);

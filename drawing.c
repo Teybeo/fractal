@@ -35,7 +35,7 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 //		}
 //		z_old = z;
 	}
-	if (depth == depth_max)
+	if (depth >= depth_max)
 		return (0);
 	return (depth);
 }

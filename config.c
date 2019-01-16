@@ -1,13 +1,14 @@
 #include "config.h"
 
-t_config	config_init()
+t_config config_init(t_float2 win_size)
 {
-	t_config config;
+	float		aspect_ratio;
+	t_config	config;
+
+	aspect_ratio = win_size.x / win_size.y;
 	config.depth_max = 100;
-//	config.z_min = (t_float2){-2, -2};
-//	config.z_max = (t_float2){2, 2};
-	config.z_min = (t_float2){-0.6, -0.};
-	config.z_max = (t_float2){-0.8, -0.2};
+	config.z_min = (t_float2){-2 * aspect_ratio, -2};
+	config.z_max = (t_float2){2 * aspect_ratio, 2};
 	config.z_size = float2_sub(config.z_max, config.z_min);
 	return (config);
 }
