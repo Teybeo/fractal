@@ -7,6 +7,13 @@ t_float2	float2_sub(t_float2 a, t_float2 b)
 			a.y - b.y};
 }
 
+t_float2	float2_add(t_float2 a, t_float2 b)
+{
+	return (t_float2){
+			a.x + b.x,
+			a.y + b.y};
+}
+
 void		float2_add_this(t_float2 *this, t_float2 b)
 {
 	this->x += b.x;

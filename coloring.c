@@ -37,7 +37,8 @@ void app_render_colors(t_surface surface, t_surface16 iter_frame, t_config confi
 		normalized = sqrtf(normalized);
 //		normalized = (depth > 0) * log2f(normalized);
 		int color_index = (int) (normalized * (PALETTE_COLOR_COUNT - 1));
-//		color_index *= (color_index);
+		color_index *= 2;
+		color_index *= 2;
 //		color_index += color_index < 0;
 		color_index %= PALETTE_COLOR_COUNT;
 		surface.pixels[i] = palette[color_index] * (depth != 0);

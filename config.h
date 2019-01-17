@@ -17,6 +17,9 @@ typedef struct s_rect {
 	t_float2 size;
 } t_rect;
 
+#define ZOOM (0.5)
+#define DEZOOM (2)
+
 t_config config_init(t_float2 win_size);
 void config_zoom_to(t_config *config, int x, int y, t_float2 win_size);
 void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size);

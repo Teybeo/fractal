@@ -48,7 +48,13 @@ int	keyup_event(int keycode, void *param)
 		app->thread_count++;
 	if (keycode == KEY_LESS)
 		app->thread_count -= (app->thread_count != 1);
-	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS || keycode == KEY_R);
+	if (keycode == KEY_ZOOM)
+		config_zoom_factor(&app->config, ZOOM);
+	if (keycode == KEY_DEZOOM)
+		config_zoom_factor(&app->config, DEZOOM);
+	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
+			|| keycode == KEY_ZOOM || keycode == KEY_DEZOOM
+			|| keycode == KEY_R);
 	return 0;
 }
 
@@ -208,12 +214,7 @@ void	app_update(t_app *app)
 		app->config.depth_max += 10;
 	if (app->keystate[KEY_MINUS])
 		app->config.depth_max -= 10 * ((app->config.depth_max - 10) >= 0);
-	if (app->keystate[KEY_ZOOM])
-		config_zoom_factor(&app->config, 0.25f);
-	if (app->keystate[KEY_DEZOOM])
-		config_zoom_factor(&app->config, -0.5f);
-	if (app->keystate[KEY_ZOOM] || app->keystate[KEY_DEZOOM]
-	|| app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS])
+	if (app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS])
 		app->need_full_redraw = true;
 }
 

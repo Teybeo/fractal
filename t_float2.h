@@ -8,6 +8,8 @@ struct	s_float2 {
 typedef struct s_float2	t_float2;
 
 t_float2	float2_sub(t_float2 a, t_float2 b);
+t_float2	float2_add(t_float2 a, t_float2 b);
+
 void		float2_add_this(t_float2 *this, t_float2 b);
 void		float2_sub_this(t_float2 *this, t_float2 b);
 void		float2_mul_this(t_float2 *this, float x);

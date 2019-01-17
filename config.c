@@ -20,59 +20,73 @@ t_rect	config_fast_move(t_config *config, t_float2 delta)
 	return (skip_rect);
 }
 
+/*
+** Recompute z_min and z_max as center +/- new_half_size
+** new_half_size = (old_size / 2) * factor
+** new_size = (new_half_size * 2)
+** new_size = ((old_size / 2) * factor) * 2
+** new_size = old_size * factor
+*/
 void config_zoom_factor(t_config *config, float factor)
 {
-	t_float2	size;
+	t_float2	new_half_size;
+	t_float2	z_center;
 
-	size = float2_sub(config->z_max, config->z_min);
-	float2_mul_this(&size, factor);
-	float2_add_this(&config->z_min, size);
-	float2_sub_this(&config->z_max, size);
+	new_half_size = float2_sub(config->z_max, config->z_min);
+	float2_mul_this(&new_half_size, 0.5f);
+	float2_mul_this(&new_half_size, factor);
+	z_center = get_center(config->z_min, config->z_max);
+	config->z_min = float2_sub(z_center, new_half_size);
+	config->z_max = float2_add(z_center, new_half_size);
 	config->z_size = float2_sub(config->z_max, config->z_min);
 }
 
+/*
+** Compute new_half_size as in config_zoom_factor()
+** After that, offset the center by half of the center_to_mouse vector
+** Add the new_half_size to the new center
+**/
+
 void config_zoom_to(t_config *config, int x, int y, t_float2 win_size)
 {
-	t_float2 size;
+	t_float2 new_half_size;
 	t_float2 center_to_mouse;
 	t_float2 z_mouse;
 	t_float2 z_center;
 
+	new_half_size = float2_sub(config->z_max, config->z_min);
+	float2_mul_this(&new_half_size, 0.5f);
+	float2_mul_this(&new_half_size, ZOOM);
+
 	z_mouse = (t_float2){x, y};
 	float2_remap(&z_mouse, win_size, config->z_size, config->z_min);
 	z_center = get_center(config->z_min, config->z_max);
-	size = float2_sub(config->z_max, config->z_min);
 	center_to_mouse = float2_sub(z_mouse, z_center);
-	center_to_mouse.x /= 2;
-	center_to_mouse.y /= 2;
-	size.x *= 0.25f;
-	size.y *= 0.25f;
-	float2_add_this(&config->z_min, size);
-	float2_sub_this(&config->z_max, size);
-	float2_add_this(&config->z_min, center_to_mouse);
-	float2_add_this(&config->z_max, center_to_mouse);
+	float2_mul_this(&center_to_mouse, 0.5f);
+	float2_add_this(&z_center, center_to_mouse);
+	config->z_min = float2_sub(z_center, new_half_size);
+	config->z_max = float2_add(z_center, new_half_size);
 	config->z_size = float2_sub(config->z_max, config->z_min);
 }
 
 void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size)
 {
-	t_float2 size;
+	t_float2 new_half_size;
 	t_float2 center_to_mouse;
 	t_float2 z_mouse;
 	t_float2 z_center;
 
+	new_half_size = float2_sub(config->z_max, config->z_min);
+	float2_mul_this(&new_half_size, 0.5f);
+	float2_mul_this(&new_half_size, DEZOOM);
+
 	z_mouse = (t_float2){x, y};
 	float2_remap(&z_mouse, win_size, config->z_size, config->z_min);
 	z_center = get_center(config->z_min, config->z_max);
-	size = float2_sub(config->z_max, config->z_min);
 	center_to_mouse = float2_sub(z_mouse, z_center);
-	center_to_mouse.x /= -1;
-	center_to_mouse.y /= -1;
-	size.x *= -0.5f;
-	size.y *= -0.5f;
-	float2_add_this(&config->z_min, size);
-	float2_sub_this(&config->z_max, size);
-	float2_add_this(&config->z_min, center_to_mouse);
-	float2_add_this(&config->z_max, center_to_mouse);
+	float2_mul_this(&center_to_mouse, -1);
+	float2_add_this(&z_center, center_to_mouse);
+	config->z_min = float2_sub(z_center, new_half_size);
+	config->z_max = float2_add(z_center, new_half_size);
 	config->z_size = float2_sub(config->z_max, config->z_min);
 }
