@@ -63,6 +63,33 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 #endif
 
 
+#include <stdio.h>
+#ifdef NEW_PARTIAL
+void	app_partial_draw(t_config config, t_rect rect, t_surface16 iter_frame)
+{
+	int			x;
+	int			y;
+	t_float2	c;
+	int			depth;
+
+	printf("origin: %f %f,  size: %f %f\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	y = (int)rect.origin.y;
+	while (y < (rect.origin.y + rect.size.y))
+	{
+		x = (int)rect.origin.x;
+		c.y = (y / iter_frame.size.y) * (config.z_size.y) + (config.z_min.y);
+		while (x < (rect.origin.x + rect.size.x))
+		{
+			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
+//			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
+			depth = get_mandelbrot_value(c, config.depth_max);
+			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
+			x++;
+		}
+		y++;
+	}
+}
+#else
 void	app_partial_draw(t_config config, t_rect skip_rect, t_surface16 iter_frame)
 {
 	int			x;
@@ -91,9 +118,25 @@ void	app_partial_draw(t_config config, t_rect skip_rect, t_surface16 iter_frame)
 		y++;
 	}
 }
+#endif
 
+#ifdef NEW_PARTIAL
+void	*draw_task(void *param)
+{
+	thread_config	conf;
 
+	t_rect rect;
+	conf = *(thread_config*)param;
+	rect.origin.y = conf.first_line;
+	rect.origin.x = 0;
+	rect.size.y = conf.last_line - conf.first_line;
+	rect.size.x = conf.win_size.x - 0;
+	app_partial_draw(conf.config, rect, (t_surface16){conf.pixels, conf.win_size});
 
+	return NULL;
+}
+
+#else
 void	*draw_task(void *param)
 {
 	int				x;
@@ -126,6 +169,7 @@ void	*draw_task(void *param)
 	}
 	return NULL;
 }
+#endif
 
 void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thread_list, int thread_count)
 {

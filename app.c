@@ -138,12 +138,33 @@ int mouse_move(int x, int y, void *param)
 	return (0);
 }
 
+t_rect	get_wide_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta)
+{
+	t_rect rect;
+	rect.size.x = frame_size.x;
+	rect.size.y = fabsf(delta.y);
+	rect.origin.x = 0;
+	rect.origin.y = (delta.y > 0) ? skip_rect.size.y : 0;
+	return rect;
+}
+
+t_rect	get_tall_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta)
+{
+	t_rect rect;
+	rect.size.x = fabsf(delta.x);
+	rect.size.y = skip_rect.size.y;
+	rect.origin.x = (delta.x > 0) ? skip_rect.size.x : 0;
+	rect.origin.y = (delta.y > 0) ? 0 : skip_rect.origin.y;
+	return rect;
+}
+
 void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 {
 	t_float2	src = {};
 	t_float2	dst = {};
 	t_rect		skip_rect;
 	t_float2	region_size;
+	t_float2	z_delta;
 
 	region_size = iter_frame.size;
 	src.x = (delta.x >= 0) ? delta.x : 0;
@@ -152,14 +173,26 @@ void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 	dst.y = (delta.y >= 0) ? 0 : -delta.y;
 	region_size.x -= fabsf(delta.x);
 	region_size.y -= fabsf(delta.y);
-	delta.x = (delta.x / iter_frame.size.x) * config->z_size.x;
-	delta.y = (delta.y / iter_frame.size.y) * config->z_size.y;
-	float2_add_this(&config->z_max, delta);
-	float2_add_this(&config->z_min, delta);
+	z_delta.x = (delta.x / iter_frame.size.x) * config->z_size.x;
+	z_delta.y = (delta.y / iter_frame.size.y) * config->z_size.y;
+	float2_add_this(&config->z_max, z_delta);
+	float2_add_this(&config->z_min, z_delta);
+	// TODO: apply partial draw logic to color rendering
+	// TODO: what about multi-threading the partial draw ?
 	copy_region(src, dst, region_size, iter_frame);
+#ifdef NEW_PARTIAL
 	skip_rect.origin = dst;
 	skip_rect.size = region_size;
+	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
+	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
+//	app_partial_draw(*config, skip_rect, iter_frame);
+//	puts("Tall dirty rect");
+	app_partial_draw(*config, tall_dirty_rect, iter_frame);
+//	puts("Wide dirty rect");
+	app_partial_draw(*config, wide_dirty_rect, iter_frame);
+#else
 	app_partial_draw(*config, skip_rect, iter_frame);
+#endif
 }
 
 
@@ -168,8 +201,8 @@ void	app_init(t_app *app)
 	int			osef;
 	t_float2	win_size;
 
-	win_size = (t_float2){1000, 1000};
-//	win_size = (t_float2){2560, 1440};
+//	win_size = (t_float2){1000, 1000};
+	win_size = (t_float2){2560, 1440};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
 	app->thread_count = 8;
@@ -208,6 +241,7 @@ void	app_update(t_app *app)
 	if (delta.x != 0 || delta.y != 0)
 	{
 		delta_draw(delta, &app->config, app->iter_buffer);
+
 		app_render_colors(app->surface, app->iter_buffer, app->config);
 	}
 	if (app->keystate[KEY_PLUS])
@@ -225,6 +259,7 @@ int		app_callback(void *param)
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
 //	app_partial_draw(app->config, (t_rect){}, app->pixels);
+//	app_draw_parallel(app->config, app->iter_buffer, app->thread_count);
 	if (app->need_full_redraw)
 	{
 		app_draw_parallel(app->config, app->iter_buffer, app->thread_count);

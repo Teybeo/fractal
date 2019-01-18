@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/01/15 15:19:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/18 20:17:06 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@
 
 # include <stdint.h>
 # include <stdbool.h>
+
+#define NEW_PARTIAL
 
 enum	e_key
 {

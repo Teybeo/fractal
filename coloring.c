@@ -25,8 +25,8 @@ void app_render_colors(t_surface surface, t_surface16 iter_frame, t_config confi
 	while (i < (iter_frame.size.x * iter_frame.size.y))
 	{
 		uint16_t depth = iter_frame.iter[i];
-		if (depth > config.depth_max)
-			printf("%i at %i\n", depth, i);
+//		if (depth > config.depth_max)
+//			printf("%i at %i\n", depth, i);
 
 //		int color = (255.f * (depth / (float)config.depth_max));
 //		surface.pixels[i] = color << 8;
