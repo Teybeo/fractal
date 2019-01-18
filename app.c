@@ -200,16 +200,16 @@ float get_frametime();
 void	app_update(t_app *app)
 {
 	t_float2	delta;
-	delta = (t_float2){};
 
-	delta.y -= app->keystate[KEY_UP];
-	delta.y += app->keystate[KEY_DOWN];
-	delta.x += app->keystate[KEY_RIGHT];
-	delta.x -= app->keystate[KEY_LEFT];
+	delta.x = app->keystate[KEY_RIGHT] - app->keystate[KEY_LEFT];
+	delta.y = app->keystate[KEY_DOWN] - app->keystate[KEY_UP];
 	delta.x *= 4;
 	delta.y *= 4;
-	delta_draw(delta, &app->config, app->iter_buffer);
-	app_render_colors(app->surface, app->iter_buffer, app->config);
+	if (delta.x != 0 || delta.y != 0)
+	{
+		delta_draw(delta, &app->config, app->iter_buffer);
+		app_render_colors(app->surface, app->iter_buffer, app->config);
+	}
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
 	if (app->keystate[KEY_MINUS])
