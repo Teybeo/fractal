@@ -11,37 +11,65 @@ uint32_t	rgb_pack(uint8_t r, uint8_t g, uint8_t b);
 
 #define PALETTE_COLOR_COUNT 1536
 
-void draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
+uint32_t depth_to_color(uint16_t depth, int depth_max)
 {
-	int			i;
 	static bool	init_done;
 	static uint32_t	palette[PALETTE_COLOR_COUNT];
+
 	if (init_done == false)
 	{
 		initPalette(palette);
 		init_done = true;
 	}
-	i = 0;
-	while (i < (iter_frame.size.x * iter_frame.size.y))
-	{
-		uint16_t depth = iter_frame.iter[i];
 //		if (depth > config.depth_max)
 //			printf("%i at %i\n", depth, i);
 
 //		int color = (255.f * (depth / (float)config.depth_max));
 //		surface.pixels[i] = color << 8;
 //		assert(depth <= config.depth_max);
-		float normalized = (depth / (float)config.depth_max);
+	float normalized = (depth / (float)depth_max);
 //		color_index *= 2;
 //		printf("%f -> %f\n", normalized, log2f(normalized));
-		normalized = sqrtf(normalized);
+	normalized = sqrtf(normalized);
 //		normalized = (depth > 0) * log2f(normalized);
-		int color_index = (int) (normalized * (PALETTE_COLOR_COUNT - 1));
-		color_index *= 2;
-		color_index *= 2;
+	int color_index = (int) (normalized * (PALETTE_COLOR_COUNT - 1));
+	color_index *= 2;
+	color_index *= 2;
 //		color_index += color_index < 0;
-		color_index %= PALETTE_COLOR_COUNT;
-		surface.pixels[i] = palette[color_index] * (depth != 0);
+	color_index %= PALETTE_COLOR_COUNT;
+	return palette[color_index] * (depth != 0);
+}
+
+void	draw_color_region(t_config config, t_rect rect, t_surface surface, t_surface16 iter_frame)
+{
+	int			x;
+	int			y;
+
+	printf("origin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	y = (int)rect.origin.y;
+	while (y < (rect.origin.y + rect.size.y))
+	{
+		x = (int)rect.origin.x;
+		while (x < (rect.origin.x + rect.size.x))
+		{
+			int i = (int)(y * iter_frame.size.x + x);
+			uint16_t depth = iter_frame.iter[i];
+			surface.pixels[i] = depth_to_color(depth, config.depth_max);
+			x++;
+		}
+		y++;
+	}
+}
+
+void draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
+{
+	int			i;
+
+	i = 0;
+	while (i < (iter_frame.size.x * iter_frame.size.y))
+	{
+		uint16_t depth = iter_frame.iter[i];
+		surface.pixels[i] = depth_to_color(depth, config.depth_max);
 		i++;
 	}
 }

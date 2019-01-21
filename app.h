@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/01/21 16:13:58 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/21 17:39:13 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 # include <stdint.h>
 # include <stdbool.h>
 
-#define NEW_PARTIAL
+#define COLOR_COPY 1
 
 enum	e_key
 {

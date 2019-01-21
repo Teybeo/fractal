@@ -71,7 +71,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 	t_float2	c;
 	int			depth;
 
-	printf("origin: %f %f,  size: %f %f\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	printf("origin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{
