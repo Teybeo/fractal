@@ -12,6 +12,6 @@ struct	s_surface
 };
 typedef struct s_surface	t_surface;
 
-void app_render_colors(t_surface surface, t_surface16 iter_frame, t_config config);
+void draw_color(t_surface surface, t_surface16 iter_frame, t_config config);
 
 #endif

@@ -13,13 +13,6 @@ t_config config_init(t_float2 win_size)
 	return (config);
 }
 
-t_rect	config_fast_move(t_config *config, t_float2 delta)
-{
-	t_rect	skip_rect;
-
-	return (skip_rect);
-}
-
 /*
 ** Recompute z_min and z_max as center +/- new_half_size
 ** new_half_size = (old_size / 2) * factor

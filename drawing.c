@@ -62,10 +62,10 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 }
 #endif
 
-
 #include <stdio.h>
+
 #ifdef NEW_PARTIAL
-void	app_partial_draw(t_config config, t_rect rect, t_surface16 iter_frame)
+void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 {
 	int			x;
 	int			y;
@@ -90,7 +90,7 @@ void	app_partial_draw(t_config config, t_rect rect, t_surface16 iter_frame)
 	}
 }
 #else
-void	app_partial_draw(t_config config, t_rect skip_rect, t_surface16 iter_frame)
+void	draw_iter_region(t_config config, t_rect skip_rect, t_surface16 iter_frame)
 {
 	int			x;
 	int			y;
@@ -131,7 +131,7 @@ void	*draw_task(void *param)
 	rect.origin.x = 0;
 	rect.size.y = conf.last_line - conf.first_line;
 	rect.size.x = conf.win_size.x - 0;
-	app_partial_draw(conf.config, rect, (t_surface16){conf.pixels, conf.win_size});
+	draw_iter_region(conf.config, rect, (t_surface16) {conf.pixels, conf.win_size});
 
 	return NULL;
 }
@@ -188,7 +188,7 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 }
 
 
-void	app_draw_parallel(t_config config, t_surface16 iter_frame, int thread_count)
+void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count)
 {
 	int i;
 

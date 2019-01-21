@@ -11,7 +11,7 @@ uint32_t	rgb_pack(uint8_t r, uint8_t g, uint8_t b);
 
 #define PALETTE_COLOR_COUNT 1536
 
-void app_render_colors(t_surface surface, t_surface16 iter_frame, t_config config)
+void draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
 {
 	int			i;
 	static bool	init_done;

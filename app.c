@@ -21,7 +21,7 @@ static unsigned long frame_counter;
 
 void	app_update(t_app *app);
 void	app_draw_ui(t_app app);
-void	delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame);
+void	app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame);
 
 int	 keydown_event(int keycode, void *param)
 {
@@ -130,8 +130,8 @@ int mouse_move(int x, int y, void *param)
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
-		delta_draw(delta, &app->config, app->iter_buffer);
-		app_render_colors(app->surface, app->iter_buffer, app->config);
+		app_delta_draw(delta, &app->config, app->iter_buffer);
+		draw_color(app->surface, app->iter_buffer, app->config);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
@@ -155,10 +155,11 @@ t_rect	get_tall_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta
 	rect.size.y = skip_rect.size.y;
 	rect.origin.x = (delta.x > 0) ? skip_rect.size.x : 0;
 	rect.origin.y = (delta.y > 0) ? 0 : skip_rect.origin.y;
+	(void)frame_size;
 	return rect;
 }
 
-void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
+void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 {
 	t_float2	src = {};
 	t_float2	dst = {};
@@ -185,13 +186,13 @@ void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 	skip_rect.size = region_size;
 	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
 	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
-//	app_partial_draw(*config, skip_rect, iter_frame);
+//	draw_iter_region(*config, skip_rect, iter_frame);
 //	puts("Tall dirty rect");
-	app_partial_draw(*config, tall_dirty_rect, iter_frame);
+	draw_iter_region(*config, tall_dirty_rect, iter_frame);
 //	puts("Wide dirty rect");
-	app_partial_draw(*config, wide_dirty_rect, iter_frame);
+	draw_iter_region(*config, wide_dirty_rect, iter_frame);
 #else
-	app_partial_draw(*config, skip_rect, iter_frame);
+	draw_iter_region(*config, skip_rect, iter_frame);
 #endif
 }
 
@@ -240,9 +241,8 @@ void	app_update(t_app *app)
 	delta.y *= 4;
 	if (delta.x != 0 || delta.y != 0)
 	{
-		delta_draw(delta, &app->config, app->iter_buffer);
-
-		app_render_colors(app->surface, app->iter_buffer, app->config);
+		app_delta_draw(delta, &app->config, app->iter_buffer);
+		draw_color(app->surface, app->iter_buffer, app->config);
 	}
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
@@ -258,12 +258,12 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-//	app_partial_draw(app->config, (t_rect){}, app->pixels);
-//	app_draw_parallel(app->config, app->iter_buffer, app->thread_count);
+//	draw_iter_region(app->config, (t_rect){}, app->pixels);
+//	draw_iter_parallel(app->config, app->iter_buffer, app->thread_count);
 	if (app->need_full_redraw)
 	{
-		app_draw_parallel(app->config, app->iter_buffer, app->thread_count);
-		app_render_colors(app->surface, app->iter_buffer, app->config);
+		draw_iter_parallel(app->config, app->iter_buffer, app->thread_count);
+		draw_color(app->surface, app->iter_buffer, app->config);
 		app->need_full_redraw = false;
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);

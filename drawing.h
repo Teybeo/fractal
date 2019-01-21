@@ -25,7 +25,7 @@ struct	s_surface16
 };
 typedef struct s_surface16	t_surface16;
 
-void	app_draw_parallel(t_config config, t_surface16 iter_frame, int thread_count);
-void	app_partial_draw(t_config config, t_rect skip_rect, t_surface16 iter_frame);
+void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count);
+void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame);
 
 #endif
