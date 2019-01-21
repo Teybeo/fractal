@@ -97,7 +97,7 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 s
 void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface)
 #endif
 {
-	if ((dst.y > src.y) || ((dst.y == src.y) && (dst.x > src.y)))
+	if ((dst.y > src.y) || ((dst.y == src.y) && (dst.x > src.x)))
 	{
 		for (int y = region_size.y - 1; y >= 0; --y)
 		{
