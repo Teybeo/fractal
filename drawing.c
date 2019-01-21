@@ -64,7 +64,6 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 
 #include <stdio.h>
 
-#ifdef NEW_PARTIAL
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 {
 	int			x;
@@ -89,38 +88,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 		y++;
 	}
 }
-#else
-void	draw_iter_region(t_config config, t_rect skip_rect, t_surface16 iter_frame)
-{
-	int			x;
-	int			y;
-	t_float2	c;
-	int			depth;
 
-	y = 0;
-	while (y < iter_frame.size.y)
-	{
-		x = 0;
-		c.y = (y / iter_frame.size.y) * (config.z_size.y) + (config.z_min.y);
-		while (x < iter_frame.size.x)
-		{
-			if (is_inside_rect(skip_rect, x, y))
-			{
-				x++;
-				continue;
-			}
-			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
-//			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
-			depth = get_mandelbrot_value(c, config.depth_max);
-			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
-			x++;
-		}
-		y++;
-	}
-}
-#endif
-
-#ifdef NEW_PARTIAL
 void	*draw_task(void *param)
 {
 	thread_config	conf;
@@ -135,41 +103,6 @@ void	*draw_task(void *param)
 
 	return NULL;
 }
-
-#else
-void	*draw_task(void *param)
-{
-	int				x;
-	int				y;
-	t_float2		c;
-	int				depth;
-	thread_config	conf;
-
-	conf = *(thread_config*)param;
-//	int pixel_id;
-//	float inv_x = 1.f / conf.win_size.x;
-//	float inv_y = 1 / conf.win_size.y;
-	y = conf.first_line;
-	while (y < conf.last_line)
-	{
-		x = 0;
-		c.y = (y / conf.win_size.y) * (conf.config.z_size.y) + (conf.config.z_min.y);
-//		c.y = (y * inv_y) * (conf.config.z_size.y) + (conf.config.z_min.y);
-//		pixel_id = y * conf.win_size.x;
-		while (x < conf.win_size.x)
-		{
-			c.x = (x / conf.win_size.x) * (conf.config.z_size.x) + (conf.config.z_min.x);
-//			c.x = (x * inv_x) * (conf.config.z_size.x) + (conf.config.z_min.x);
-//			c.x = (x / conf.win_size.x) * (conf.config.z_max.x - conf.config.z_min.x) + (conf.config.z_min.x);
-			depth = get_mandelbrot_value(c, conf.config.depth_max);
-			conf.pixels[(int)(y * conf.win_size.x + x)] = depth;
-			x++;
-		}
-		y++;
-	}
-	return NULL;
-}
-#endif
 
 void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thread_list, int thread_count)
 {
@@ -186,7 +119,6 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 		i++;
 	}
 }
-
 
 void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count)
 {
@@ -209,4 +141,3 @@ void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_coun
 		i++;
 	}
 }
-

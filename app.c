@@ -181,7 +181,6 @@ void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 	// TODO: apply partial draw logic to color rendering
 	// TODO: what about multi-threading the partial draw ?
 	copy_region(src, dst, region_size, iter_frame);
-#ifdef NEW_PARTIAL
 	skip_rect.origin = dst;
 	skip_rect.size = region_size;
 	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
@@ -191,9 +190,6 @@ void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 	draw_iter_region(*config, tall_dirty_rect, iter_frame);
 //	puts("Wide dirty rect");
 	draw_iter_region(*config, wide_dirty_rect, iter_frame);
-#else
-	draw_iter_region(*config, skip_rect, iter_frame);
-#endif
 }
 
 
