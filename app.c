@@ -97,11 +97,11 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 s
 void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface)
 #endif
 {
-	if ((dst.y > src.y) || ((dst.y == src.y) && (dst.x > src.x)))
+	if ((dst.y < src.y) || ((dst.y == src.y) && (dst.x < src.x)))
 	{
-		for (int y = region_size.y - 1; y >= 0; --y)
+		for (int y = 0; y < region_size.y; ++y)
 		{
-			for (int x = region_size.x - 1; x >= 0; --x)
+			for (int x = 0; x < region_size.x; ++x)
 			{
 				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
 				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
@@ -114,9 +114,9 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 s
 	}
 	else
 	{
-		for (int y = 0; y < region_size.y; ++y)
+		for (int y = region_size.y - 1; y >= 0; --y)
 		{
-			for (int x = 0; x < region_size.x; ++x)
+			for (int x = region_size.x - 1; x >= 0; --x)
 			{
 				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
 				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
