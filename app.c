@@ -217,8 +217,10 @@ void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 	skip_rect.size = region_size;
 	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
 	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
-	draw_iter_region(*config, tall_dirty_rect, iter_frame);
-	draw_iter_region(*config, wide_dirty_rect, iter_frame);
+//	draw_iter_region(*config, tall_dirty_rect, iter_frame);
+//	draw_iter_region(*config, wide_dirty_rect, iter_frame);
+	draw_iter_parallel_region(*config, iter_frame, 8, wide_dirty_rect);
+	draw_iter_parallel_region(*config, iter_frame, 8, tall_dirty_rect);
 	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
 	draw_color_region(*config, tall_dirty_rect, color_frame, iter_frame);
 #endif
@@ -266,7 +268,7 @@ void	app_update(t_app *app)
 	delta.x = app->keystate[KEY_RIGHT] - app->keystate[KEY_LEFT];
 	delta.y = app->keystate[KEY_DOWN] - app->keystate[KEY_UP];
 	delta.x *= 4;
-	delta.y *= 4;
+	delta.y *= 10;
 	if (delta.x != 0 || delta.y != 0)
 	{
 #ifdef COLOR_COPY

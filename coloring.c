@@ -45,7 +45,7 @@ void	draw_color_region(t_config config, t_rect rect, t_surface surface, t_surfac
 	int			x;
 	int			y;
 
-	printf("origin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	printf("draw_color_region\norigin: %4g %4g,  size: %4g %4g\n\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{

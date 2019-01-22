@@ -64,6 +64,8 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 
 #include <stdio.h>
 
+void prepare_threads_continued(thread_config *thread_list, int thread_count, t_rect rect);
+
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 {
 	int			x;
@@ -71,7 +73,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 	t_float2	c;
 	int			depth;
 
-	printf("origin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	printf("draw_iter_region\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{
@@ -95,12 +97,17 @@ void	*draw_task(void *param)
 
 	t_rect rect;
 	conf = *(thread_config*)param;
-	rect.origin.y = conf.first_line;
-	rect.origin.x = 0;
-	rect.size.y = conf.last_line - conf.first_line;
-	rect.size.x = conf.win_size.x - 0;
-	draw_iter_region(conf.config, rect, (t_surface16) {conf.pixels, conf.win_size});
-
+	rect = conf.rect;
+	if (rect.size.x != -1)
+		draw_iter_region(conf.config, rect, (t_surface16) {conf.pixels, conf.win_size});
+	else
+	{
+		rect.origin.y = conf.first_line;
+		rect.origin.x = 0;
+		rect.size.y = conf.last_line - conf.first_line;
+		rect.size.x = conf.win_size.x - 0;
+		draw_iter_region(conf.config, rect, (t_surface16) {conf.pixels, conf.win_size});
+	}
 	return NULL;
 }
 
@@ -116,9 +123,70 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 		thread_list[i].config = config;
 		thread_list[i].pixels = iter_frame.iter;
 		thread_list[i].thread_id = i;
+		thread_list[i].rect.size.x = -1;
 		i++;
 	}
 }
+
+#define X_IS_MAJOR_AXIS 1
+#define Y_IS_MAJOR_AXIS 0
+
+void prepare_threads_continued(thread_config *thread_list, int thread_count, t_rect rect)
+{
+	int		i;
+	bool	major_axis;
+	int		rect_height;
+	int		rect_width;
+
+	printf("prepare_threads_continued\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	major_axis = (rect.size.x > rect.size.y);
+	rect_width = (int)rect.size.x;
+	rect_height = (int)(rect.size.y / thread_count);
+	i = 0;
+	while (i < thread_count)
+	{
+		thread_list[i].rect.size.y = rect_height;
+		thread_list[i].rect.size.x = rect_width;
+		thread_list[i].rect.origin.x = rect.origin.x;
+		thread_list[i].rect.origin.y = rect.origin.y + (i * rect_height);
+		printf("Thread: %d   ", i);
+		printf("origin: %4g %4g,  size: %4g %4g\n", thread_list[i].rect.origin.x, thread_list[i].rect.origin.y, thread_list[i].rect.size.x, thread_list[i].rect.size.y);
+
+		if (major_axis == X_IS_MAJOR_AXIS)
+		{
+		}
+		i++;
+	}
+}
+
+void	draw_iter_parallel_region(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect)
+{
+	int				i;
+	pthread_t		thread_list[MAX_THREAD] = {};
+	thread_config	thread_config_list[MAX_THREAD] = {};
+
+	if (rect.size.y < thread_count)
+		thread_count = (int) rect.size.y;
+	if (rect.size.x == 0 || rect.size.y == 0)
+		return;
+	prepare_threads(config, iter_frame, thread_config_list, thread_count);
+	prepare_threads_continued(thread_config_list, thread_count, rect);
+	i = 0;
+	while (i < thread_count)
+	{
+		pthread_create(thread_list + i, NULL, draw_task, thread_config_list + i);
+		i++;
+	}
+
+	i = 0;
+	while (i < thread_count)
+	{
+		pthread_join(thread_list[i], NULL);
+		i++;
+	}
+}
+
+
 
 void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count)
 {

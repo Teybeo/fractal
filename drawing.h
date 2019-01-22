@@ -13,6 +13,7 @@ typedef struct thread_config {
 	int			first_line;
 	int			last_line;
 	uint16_t	*pixels;
+	t_rect		rect;
 	char		thread_id;
 } thread_config;
 
@@ -25,7 +26,8 @@ struct	s_surface16
 };
 typedef struct s_surface16	t_surface16;
 
-void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count);
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame);
+void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count);
+void	draw_iter_parallel_region(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect);
 
 #endif
