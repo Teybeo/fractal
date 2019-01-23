@@ -21,11 +21,7 @@ static unsigned long frame_counter;
 
 void	app_update(t_app *app);
 void	app_draw_ui(t_app app);
-#ifdef COLOR_COPY
-void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame);
-#else
-void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame);
-#endif
+void	app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame);
 
 int	 keydown_event(int keycode, void *param)
 {
@@ -91,11 +87,7 @@ int	mouse_up(int button, int x, int y, void *param)
 		app->is_dragging = false;
 	return 0;
 }
-#ifdef COLOR_COPY
 void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface, t_surface color_frame)
-#else
-void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface)
-#endif
 {
 	if ((dst.y < src.y) || ((dst.y == src.y) && (dst.x < src.x)))
 	{
@@ -106,9 +98,7 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 s
 				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
 				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
 				surface.iter[dst_index] = surface.iter[src_index];
-#ifdef COLOR_COPY
 				color_frame.pixels[dst_index] = color_frame.pixels[src_index];
-#endif
 			}
 		}
 	}
@@ -121,9 +111,7 @@ void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 s
 				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
 				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
 				surface.iter[dst_index] = surface.iter[src_index];
-#ifdef COLOR_COPY
 				color_frame.pixels[dst_index] = color_frame.pixels[src_index];
-#endif
 			}
 		}
 	}
@@ -143,12 +131,7 @@ int mouse_move(int x, int y, void *param)
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
-#ifndef COLOR_COPY
-		app_delta_draw(delta, &app->config, app->iter_buffer);
-		draw_color(app->surface, app->iter_buffer, app->config);
-#else
 		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface);
-#endif
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
@@ -175,11 +158,8 @@ t_rect	get_tall_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta
 	(void)frame_size;
 	return rect;
 }
-#ifdef COLOR_COPY
+
 void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame)
-#else
-void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
-#endif
 {
 	t_float2	src = {};
 	t_float2	dst = {};
@@ -198,32 +178,18 @@ void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame)
 	z_delta.y = (delta.y / iter_frame.size.y) * config->z_size.y;
 	float2_add_this(&config->z_max, z_delta);
 	float2_add_this(&config->z_min, z_delta);
-	// TODO: apply partial draw logic to color rendering
-	// TODO: what about multi-threading the partial draw ?
-#ifndef COLOR_COPY
-	copy_region(src, dst, region_size, iter_frame);
-	skip_rect.origin = dst;
-	skip_rect.size = region_size;
-	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
-	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
-//	draw_iter_region(*config, skip_rect, iter_frame);
-//	puts("Tall dirty rect");
-	draw_iter_region(*config, tall_dirty_rect, iter_frame);
-//	puts("Wide dirty rect");
-	draw_iter_region(*config, wide_dirty_rect, iter_frame);
-#else
 	copy_region(src, dst, region_size, iter_frame, color_frame);
 	skip_rect.origin = dst;
 	skip_rect.size = region_size;
 	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
 	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
-//	draw_iter_region(*config, tall_dirty_rect, iter_frame);
-//	draw_iter_region(*config, wide_dirty_rect, iter_frame);
-	draw_iter_parallel_region(*config, iter_frame, 8, wide_dirty_rect);
-	draw_iter_parallel_region(*config, iter_frame, 8, tall_dirty_rect);
+	draw_iter_region(*config, tall_dirty_rect, iter_frame);
+	draw_iter_region(*config, wide_dirty_rect, iter_frame);
+	// TODO: what about multi-threading the partial draw ?
+//	draw_iter_parallel_region(*config, iter_frame, 8, wide_dirty_rect);
+//	draw_iter_parallel_region(*config, iter_frame, 8, tall_dirty_rect);
 	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
 	draw_color_region(*config, tall_dirty_rect, color_frame, iter_frame);
-#endif
 }
 
 
@@ -271,12 +237,7 @@ void	app_update(t_app *app)
 	delta.y *= 10;
 	if (delta.x != 0 || delta.y != 0)
 	{
-#ifdef COLOR_COPY
 		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface);
-#else
-		app_delta_draw(delta, &app->config, app->iter_buffer);
-		draw_color(app->surface, app->iter_buffer, app->config);
-#endif
 	}
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;

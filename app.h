@@ -21,8 +21,6 @@
 # include <stdint.h>
 # include <stdbool.h>
 
-#define COLOR_COPY 1
-
 enum	e_key
 {
 	KEY_ESCAPE = 53,
