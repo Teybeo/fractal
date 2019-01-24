@@ -202,7 +202,7 @@ void	app_init(t_app *app)
 //	win_size = (t_float2){2560, 1440};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
-	app->thread_count = 8;
+	app->thread_count = 4;
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->is_dragging = false;
 	app->need_full_redraw = true;

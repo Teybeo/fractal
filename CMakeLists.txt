@@ -8,8 +8,8 @@ add_compile_options(-Wall -Wextra)
 #add_compile_options(-fsanitize=address -g3)
 #link_libraries(-fsanitize=address -g3)
 
-#add_compile_options(-fsanitize=thread -g3)
-#link_libraries(-fsanitize=thread -g3)
+add_compile_options(-fsanitize=thread -g3)
+link_libraries(-fsanitize=thread -g3)
 
 #set(CMAKE_C_FLAGS_DEBUG "-g3")
 #set(CMAKE_C_FLAGS_DEBUG "-Og")
