@@ -73,7 +73,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 	t_float2	c;
 	int			depth;
 
-	printf("draw_iter_region\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	printf("draw_iter_region\n\0origin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{
@@ -186,7 +186,21 @@ void	draw_iter_parallel_region(t_config config, t_surface16 iter_frame, int thre
 	}
 }
 
+void	draw_iter_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame)
+{
+	int				i;
+	thread_config	thread_config_list[MAX_THREAD] = {};
 
+	prepare_threads(config, iter_frame, thread_config_list, pool->thread_count);
+	i = 0;
+	while (i < pool->thread_count)
+	{
+		thread_pool_add_work(pool, thread_config_list + i, sizeof(thread_config), draw_task);
+		i++;
+	}
+
+	thread_pool_wait(pool);
+}
 
 void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count)
 {

@@ -198,11 +198,12 @@ void	app_init(t_app *app)
 	int			osef;
 	t_float2	win_size;
 
-//	win_size = (t_float2){1000, 1000};
-	win_size = (t_float2){2560, 1440};
+	win_size = (t_float2){1000, 1000};
+//	win_size = (t_float2){2560, 1440};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
 	app->thread_count = 8;
+	app->thread_pool = create_thread_pool(app->thread_count);
 	app->is_dragging = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
@@ -255,7 +256,11 @@ int		app_callback(void *param)
 	mlx_clear_window(app->mlx_context, app->mlx_window);
 	if (app->need_full_redraw)
 	{
+#if USE_THREAD_POOL
+		draw_iter_parallel_pool(app->config, app->thread_pool, app->iter_buffer);
+#else
 		draw_iter_parallel(app->config, app->iter_buffer, app->thread_count);
+#endif
 		draw_color(app->surface, app->iter_buffer, app->config);
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);

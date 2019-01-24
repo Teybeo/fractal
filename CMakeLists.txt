@@ -1,12 +1,17 @@
 cmake_minimum_required(VERSION 3.12)
 project(fractol C)
 
+
+
 add_compile_options(-Wall -Wextra)
-#add_compile_options(-Wall -Wextra -fsanitize=address -g3)
-#
+
+#add_compile_options(-fsanitize=address -g3)
 #link_libraries(-fsanitize=address -g3)
 
-set(CMAKE_C_FLAGS_DEBUG "-g3")
+#add_compile_options(-fsanitize=thread -g3)
+#link_libraries(-fsanitize=thread -g3)
+
+#set(CMAKE_C_FLAGS_DEBUG "-g3")
 #set(CMAKE_C_FLAGS_DEBUG "-Og")
 set(CMAKE_C_FLAGS_RELEASE "-O2 -ffast-math -flto -march=native")
 
@@ -18,7 +23,8 @@ set(SOURCE_FILES
         t_float2.c
         drawing.c
         config.c
-        coloring.c)
+        coloring.c
+        thread_pool.c)
 
 add_executable(fractol ${SOURCE_FILES})
 

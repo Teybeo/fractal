@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/01/21 17:39:13 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/23 19:35:08 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,12 @@
 # include "config.h"
 # include "drawing.h"
 # include "coloring.h"
+# include "thread_pool.h"
 
 # include <stdint.h>
 # include <stdbool.h>
+
+#define USE_THREAD_POOL 1
 
 enum	e_key
 {
@@ -40,16 +43,17 @@ enum	e_key
 
 struct	s_app
 {
-	void		*mlx_context;
-	void		*mlx_texture;
-	void		*mlx_window;
-	t_surface	surface;
-	t_surface16	iter_buffer;
-	t_config	config;
-	int			thread_count;
-	bool		keystate[KEY_LAST];
-	bool		is_dragging;
-	bool		need_full_redraw;
+	void			*mlx_context;
+	void			*mlx_texture;
+	void			*mlx_window;
+	t_surface		surface;
+	t_surface16		iter_buffer;
+	t_config		config;
+	t_thread_pool	*thread_pool;
+	int				thread_count;
+	bool			keystate[KEY_LAST];
+	bool			is_dragging;
+	bool			need_full_redraw;
 };
 typedef struct s_app	t_app;
 
