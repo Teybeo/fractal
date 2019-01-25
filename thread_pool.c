@@ -15,10 +15,9 @@ t_thread_pool	*create_thread_pool(int thread_count)
 
 	pool = malloc(sizeof(t_thread_pool));
 	pool->thread_count = thread_count;
-	pool->working_count = 0;
+	pool->unfinished_work = 0;
 	pool->work_queue = NULL;
 	pool->thread_array = malloc(sizeof(pthread_t) * thread_count);
-	pool->working_count_mutex = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
 	pool->queue_mutex = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
 	pool->work_available = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
 	pool->work_done = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
@@ -44,30 +43,29 @@ t_thread_pool	*create_thread_pool(int thread_count)
 
 /*
 ** Lock queue mutex
-** If queue still has work, wait for signal (mutex is unlocked while waiting)
+** 		If there is unfinished_work,
+ * 			Wait for work_done signal
 ** Unlock queue mutex
 **/
 
 void thread_pool_wait(t_thread_pool* pool)
 {
 	puts("Acquiring queue mutex...");
-//	pthread_mutex_lock(&pool->queue_mutex);
-	pthread_mutex_lock(&pool->working_count_mutex);
-	//TODO: How do we wait on 2 values that are behind 2 mutexes if cond_wait only release 1 ?
-	while (pool->work_queue != NULL || pool->working_count != 0)
+	pthread_mutex_lock(&pool->queue_mutex);
+	while (pool->unfinished_work)
 	{
 		puts("Sleeping waiting for all work done!");
-		pthread_cond_wait(&pool->work_done, &pool->working_count_mutex);
+		pthread_cond_wait(&pool->work_done, &pool->queue_mutex);
 	}
-	pthread_mutex_unlock(&pool->working_count_mutex);
-//	pthread_mutex_unlock(&pool->queue_mutex);
+	pthread_mutex_unlock(&pool->queue_mutex);
 	puts("WAIT DONE");
 }
 
 /*
 ** Lock queue mutex
-** push_work()
-** If queue was empty, send signal
+** 		Push work on queue
+** 		Increment unfinished_work
+** 		Send work_available signal
 ** Unlock queue mutex
 **/
 
@@ -81,11 +79,10 @@ void	thread_pool_add_work(t_thread_pool *pool, void *data, size_t data_size, voi
 	new->task = task;
 	new->next = NULL;
 	pthread_mutex_lock(&pool->queue_mutex);
-	push_work(&pool->work_queue, new);
-	puts("New work pushed");
-//	if (pool->work_queue == new)
-	pthread_cond_signal(&pool->work_available);
-//		pthread_cond_broadcast(&pool->work_available);
+		push_work(&pool->work_queue, new);
+		pool->unfinished_work++;
+		puts("New work pushed");
+		pthread_cond_signal(&pool->work_available);
 	pthread_mutex_unlock(&pool->queue_mutex);
 }
 
@@ -94,9 +91,18 @@ void	thread_pool_add_work(t_thread_pool *pool, void *data, size_t data_size, voi
 
 /*
 ** Lock queue mutex
-** If no work, wait for a signal (mutex is unlocked while waiting)
-** Pop work from queue
+** 		If no work
+ * 			Wait for a work_available signal
+** 		Pop work from queue
 ** Unlock queue mutex
+ *
+ * Do work
+ *
+ * Lock queue mutex
+ * 		Decrement unfinished_work
+ *		If no unfinished_work,
+ * 			Send work_done signal
+ * Unlock queue mutex
 */
 #include <stdio.h>
 void	*run_task(void *arg)
@@ -116,34 +122,27 @@ void	*run_task(void *arg)
 	{
 		printf(" %d  Acquiring queue mutex...\n", id);
 		pthread_mutex_lock(&pool->queue_mutex);
-		while (pool->work_queue == NULL)
-		{
-			printf(" %d  Sleeping waiting for work !\n", id);
-//			fflush(stdout);
-			pthread_cond_wait(&pool->work_available, &pool->queue_mutex);
-		}
-		printf(" %d  We got work !\n", id);
-		work = pop_work(&pool->work_queue);
+			while (pool->work_queue == NULL)
+			{
+				printf(" %d  Sleeping waiting for work !\n", id);
+				pthread_cond_wait(&pool->work_available, &pool->queue_mutex);
+			}
+			printf(" %d  We got work !\n", id);
+			work = pop_work(&pool->work_queue);
 		pthread_mutex_unlock(&pool->queue_mutex);
-
-		pthread_mutex_lock(&pool->working_count_mutex);
-		pool->working_count++;
-		pthread_mutex_unlock(&pool->working_count_mutex);
 
 		printf(" %d  Task running...\n", id);
 		work->task(work->data);
 		printf(" %d  Task end !\n", id);
 
-		pthread_mutex_lock(&pool->working_count_mutex);
-		pool->working_count--;
-//		pthread_mutex_lock(&pool->queue_mutex);
-		if (pool->working_count == 0)
-		{
-			printf(" %d  All threads idle !\n", id);
-			pthread_cond_signal(&pool->work_done);
-		}
-		pthread_mutex_unlock(&pool->working_count_mutex);
-//		pthread_mutex_unlock(&pool->queue_mutex);
+		pthread_mutex_lock(&pool->queue_mutex);
+			pool->unfinished_work--;
+			if (pool->unfinished_work == 0)
+			{
+				printf(" %d  No more work !\n", id);
+				pthread_cond_signal(&pool->work_done);
+			}
+		pthread_mutex_unlock(&pool->queue_mutex);
 
 		free(work->data);
 		free(work);

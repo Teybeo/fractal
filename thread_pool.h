@@ -13,12 +13,11 @@ typedef struct s_work_queue	t_work_queue;
 
 struct	s_thread_pool {
 	int				thread_count;
-	int				working_count;
+	int				unfinished_work;
 	pthread_t		*thread_array;
 	t_work_queue	*work_queue;
 	pthread_mutex_t	queue_mutex;
 	pthread_cond_t	work_available;
-	pthread_mutex_t	working_count_mutex;
 	pthread_cond_t	work_done;
 };
 typedef struct s_thread_pool	t_thread_pool;
