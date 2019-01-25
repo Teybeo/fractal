@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/01/25 15:33:37 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/01/25 16:54:52 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 # include <stdint.h>
 # include <stdbool.h>
 
-#define USE_THREAD_POOL 1
+//#define USE_THREAD_POOL 1
 
 enum	e_key
 {

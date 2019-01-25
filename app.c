@@ -21,7 +21,7 @@ static unsigned long frame_counter;
 
 void	app_update(t_app *app);
 void	app_draw_ui(t_app app);
-void	app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame);
+void	app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool);
 
 int	 keydown_event(int keycode, void *param)
 {
@@ -131,7 +131,7 @@ int mouse_move(int x, int y, void *param)
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
-		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface);
+		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 	}
@@ -159,7 +159,7 @@ t_rect	get_tall_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta
 	return rect;
 }
 
-void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame)
+void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)
 {
 	t_float2	src = {};
 	t_float2	dst = {};
@@ -183,11 +183,11 @@ void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_
 	skip_rect.size = region_size;
 	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
 	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
-	draw_iter_region(*config, tall_dirty_rect, iter_frame);
-	draw_iter_region(*config, wide_dirty_rect, iter_frame);
+//	draw_iter_region(*config, tall_dirty_rect, iter_frame);
+//	draw_iter_region(*config, wide_dirty_rect, iter_frame);
 	// TODO: what about multi-threading the partial draw ?
-//	draw_iter_region_parallel(*config, iter_frame, 8, wide_dirty_rect);
-//	draw_iter_region_parallel(*config, iter_frame, 8, tall_dirty_rect);
+	draw_iter_region_parallel_pool(*config, pool, iter_frame, wide_dirty_rect);
+	draw_iter_region_parallel_pool(*config, pool, iter_frame, tall_dirty_rect);
 	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
 	draw_color_region(*config, tall_dirty_rect, color_frame, iter_frame);
 }
@@ -198,11 +198,11 @@ void	app_init(t_app *app)
 	int			osef;
 	t_float2	win_size;
 
-	win_size = (t_float2){1000, 1000};
-//	win_size = (t_float2){2560, 1440};
+//	win_size = (t_float2){1000, 1000};
+	win_size = (t_float2){2560, 1440};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
-	app->thread_count = 16;
+	app->thread_count = 4;
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->is_dragging = false;
 	app->need_full_redraw = true;
@@ -235,10 +235,10 @@ void	app_update(t_app *app)
 	delta.x = app->keystate[KEY_RIGHT] - app->keystate[KEY_LEFT];
 	delta.y = app->keystate[KEY_DOWN] - app->keystate[KEY_UP];
 	delta.x *= 4;
-	delta.y *= 10;
+	delta.y *= 70;
 	if (delta.x != 0 || delta.y != 0)
 	{
-		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface);
+		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
 	}
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
@@ -254,7 +254,8 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-	if (1 || app->need_full_redraw)
+//	if (1 || app->need_full_redraw)
+	if (app->need_full_redraw)
 	{
 		t_rect rect = {{}, app->iter_buffer.size};
 #if USE_THREAD_POOL

@@ -24,7 +24,8 @@ uint32_t depth_to_color(uint16_t depth, int depth_max)
 //		if (depth > config.depth_max)
 //			printf("%i at %i\n", depth, i);
 
-//		int color = (255.f * (depth / (float)config.depth_max));
+		int color = (255.f * (depth / (float)depth_max));
+	return (color << 8);
 //		surface.pixels[i] = color << 8;
 //		assert(depth <= config.depth_max);
 	float normalized = (depth / (float)depth_max);
@@ -33,8 +34,8 @@ uint32_t depth_to_color(uint16_t depth, int depth_max)
 	normalized = sqrtf(normalized);
 //		normalized = (depth > 0) * log2f(normalized);
 	int color_index = (int) (normalized * (PALETTE_COLOR_COUNT - 1));
-	color_index *= 2;
-	color_index *= 2;
+//	color_index *= 2;
+//	color_index *= 2;
 //		color_index += color_index < 0;
 	color_index %= PALETTE_COLOR_COUNT;
 	return palette[color_index] * (depth != 0);
@@ -44,7 +45,8 @@ void	draw_color_region(t_config config, t_rect rect, t_surface surface, t_surfac
 {
 	int			x;
 	int			y;
-
+	if (rect.size.x == 0 || rect.size.y == 0)
+		return;
 	printf("draw_color_region\norigin: %4g %4g,  size: %4g %4g\n\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))

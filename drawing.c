@@ -64,10 +64,17 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 
 #include <stdio.h>
 #include <assert.h>
+#include <math.h>
 
-void prepare_threads_chunks(thread_config *thread_list, int thread_count, t_rect rect);
+void	prepare_threads_chunks(thread_config *thread_list, int chunk_count, t_rect rect);
+void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame, int thread_id);
 
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
+{
+	draw_iter_region_debug(config, rect, iter_frame, -1);
+}
+
+void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame, int thread_id)
 {
 	int			x;
 	int			y;
@@ -86,6 +93,8 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 //			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
 			depth = get_mandelbrot_value(c, config.depth_max);
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
+			if (thread_id >= 0)
+				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 1) << 16;
 			x++;
 		}
 		y++;
@@ -97,7 +106,8 @@ void	*draw_task(void *param)
 	thread_config	conf;
 
 	conf = *(thread_config*)param;
-	draw_iter_region(conf.config, conf.rect, (t_surface16) {conf.pixels, conf.win_size});
+//	draw_iter_region(conf.config, conf.rect, (t_surface16) {conf.pixels, conf.win_size});
+	draw_iter_region_debug(conf.config, conf.rect, (t_surface16) {conf.pixels, conf.win_size}, conf.thread_id + 1);
 	return NULL;
 }
 
@@ -118,44 +128,54 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 #define X_IS_MAJOR_AXIS 1
 #define Y_IS_MAJOR_AXIS 0
 
-void prepare_threads_chunks(thread_config *thread_list, int thread_count, t_rect rect)
+void prepare_threads_chunks(thread_config *thread_list, int chunk_count, t_rect rect)
 {
 	int		i;
 	bool	major_axis;
-	int		rect_height;
-	int		rect_width;
+	t_rect	chunk;
+	int		chunk_height;
 
-	printf("prepare_threads_chunks\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	major_axis = (rect.size.x > rect.size.y);
-	rect_width = (int)rect.size.x;
-	rect_height = (int)(rect.size.y / thread_count);
+	chunk.size.x = rect.size.x;
+	chunk_height = (int) (rect.size.y / chunk_count);
+	printf("prepare_threads_chunks %d\norigin: %4g %4g,  size: %4g %4g\n", chunk_count, rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+
 	i = 0;
-	while (i < thread_count)
+	while (i < chunk_count)
 	{
-		thread_list[i].rect.size.y = rect_height;
-		thread_list[i].rect.size.x = rect_width;
-		thread_list[i].rect.origin.x = rect.origin.x;
-		thread_list[i].rect.origin.y = rect.origin.y + (i * rect_height);
+		chunk.origin.x = rect.origin.x;
+		chunk.origin.y = rect.origin.y + (i * chunk_height);
+
+		chunk.size.y = chunk_height;
+		int overshoot = (chunk.origin.y + chunk_height) - (rect.origin.y + rect.size.y);
+		printf("overshoot %d\n", overshoot);
+		if (overshoot > 0)
+			chunk.size.y -= overshoot;
+
 		printf("Thread: %d   ", i);
-		printf("origin: %4g %4g,  size: %4g %4g\n", thread_list[i].rect.origin.x, thread_list[i].rect.origin.y, thread_list[i].rect.size.x, thread_list[i].rect.size.y);
+		printf("origin: %4g %4g,  size: %4g %4g\n", chunk.origin.x, chunk.origin.y, chunk.size.x, chunk.size.y);
 
 		if (major_axis == X_IS_MAJOR_AXIS)
 		{
 		}
+		thread_list[i].rect = chunk;
 		i++;
 	}
 }
 
 void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect)
 {
+	if (rect.size.x == 0 || rect.size.y == 0)
+		return;
+
+	printf("draw_iter_region_parallel\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+
 	int				i;
 	pthread_t		thread_list[MAX_THREAD] = {};
 	thread_config	thread_config_list[MAX_THREAD] = {};
 
 	if (rect.size.y < thread_count)
 		thread_count = (int) rect.size.y;
-	if (rect.size.x == 0 || rect.size.y == 0)
-		return;
 	prepare_threads(config, iter_frame, thread_config_list, thread_count);
 	prepare_threads_chunks(thread_config_list, thread_count, rect);
 	i = 0;
@@ -173,11 +193,18 @@ void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thre
 	}
 }
 
+int	get_adjusted_chunk_count(t_rect rect, int chunk_count);
+
 void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect)
 {
+	if (rect.size.x == 0 || rect.size.y == 0)
+		return;
+
+	printf("draw_iter_region_parallel_pool\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
-	int chunk_count = 32;
+	int chunk_count = get_adjusted_chunk_count(rect, 32);
 	assert(chunk_count < MAX_THREAD);
 
 	prepare_threads(config, iter_frame, thread_config_list, chunk_count);
@@ -190,4 +217,27 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	}
 
 	thread_pool_wait(pool);
+}
+
+int	get_adjusted_chunk_count(t_rect rect, int chunk_count)
+{
+	int		major_axis;
+	float	chunk_width;
+	float	chunk_height;
+	int		new_chunk_count;
+
+	major_axis = (rect.size.x > rect.size.y);
+	if (major_axis == X_IS_MAJOR_AXIS)
+	{
+		if (rect.size.y < chunk_count)
+			return (int)(rect.size.y);
+		chunk_width = rect.size.x;
+		chunk_height = (rect.size.y / chunk_count);
+		chunk_height = (int)(chunk_height);
+		new_chunk_count = (int)(rect.size.y / chunk_height);
+		if ((new_chunk_count * chunk_height) < rect.size.y)
+			new_chunk_count++;
+		chunk_count = new_chunk_count;
+	}
+	return chunk_count;
 }
