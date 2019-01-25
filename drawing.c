@@ -63,8 +63,9 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 #endif
 
 #include <stdio.h>
+#include <assert.h>
 
-void prepare_threads_continued(thread_config *thread_list, int thread_count, t_rect rect);
+void prepare_threads_chunks(thread_config *thread_list, int thread_count, t_rect rect);
 
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 {
@@ -95,19 +96,8 @@ void	*draw_task(void *param)
 {
 	thread_config	conf;
 
-	t_rect rect;
 	conf = *(thread_config*)param;
-	rect = conf.rect;
-	if (rect.size.x != -1)
-		draw_iter_region(conf.config, rect, (t_surface16) {conf.pixels, conf.win_size});
-	else
-	{
-		rect.origin.y = conf.first_line;
-		rect.origin.x = 0;
-		rect.size.y = conf.last_line - conf.first_line;
-		rect.size.x = conf.win_size.x - 0;
-		draw_iter_region(conf.config, rect, (t_surface16) {conf.pixels, conf.win_size});
-	}
+	draw_iter_region(conf.config, conf.rect, (t_surface16) {conf.pixels, conf.win_size});
 	return NULL;
 }
 
@@ -118,12 +108,9 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 	while (i < thread_count)
 	{
 		thread_list[i].win_size = iter_frame.size;
-		thread_list[i].first_line = i * (iter_frame.size.y / thread_count);
-		thread_list[i].last_line = (i + 1) * (iter_frame.size.y / thread_count);
 		thread_list[i].config = config;
 		thread_list[i].pixels = iter_frame.iter;
 		thread_list[i].thread_id = i;
-		thread_list[i].rect.size.x = -1;
 		i++;
 	}
 }
@@ -131,14 +118,14 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 #define X_IS_MAJOR_AXIS 1
 #define Y_IS_MAJOR_AXIS 0
 
-void prepare_threads_continued(thread_config *thread_list, int thread_count, t_rect rect)
+void prepare_threads_chunks(thread_config *thread_list, int thread_count, t_rect rect)
 {
 	int		i;
 	bool	major_axis;
 	int		rect_height;
 	int		rect_width;
 
-	printf("prepare_threads_continued\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	printf("prepare_threads_chunks\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	major_axis = (rect.size.x > rect.size.y);
 	rect_width = (int)rect.size.x;
 	rect_height = (int)(rect.size.y / thread_count);
@@ -159,7 +146,7 @@ void prepare_threads_continued(thread_config *thread_list, int thread_count, t_r
 	}
 }
 
-void	draw_iter_parallel_region(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect)
+void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect)
 {
 	int				i;
 	pthread_t		thread_list[MAX_THREAD] = {};
@@ -170,7 +157,7 @@ void	draw_iter_parallel_region(t_config config, t_surface16 iter_frame, int thre
 	if (rect.size.x == 0 || rect.size.y == 0)
 		return;
 	prepare_threads(config, iter_frame, thread_config_list, thread_count);
-	prepare_threads_continued(thread_config_list, thread_count, rect);
+	prepare_threads_chunks(thread_config_list, thread_count, rect);
 	i = 0;
 	while (i < thread_count)
 	{
@@ -186,40 +173,21 @@ void	draw_iter_parallel_region(t_config config, t_surface16 iter_frame, int thre
 	}
 }
 
-void	draw_iter_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame)
+void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect)
 {
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
+	int chunk_count = 32;
+	assert(chunk_count < MAX_THREAD);
 
-	prepare_threads(config, iter_frame, thread_config_list, pool->thread_count);
+	prepare_threads(config, iter_frame, thread_config_list, chunk_count);
+	prepare_threads_chunks(thread_config_list, chunk_count, rect);
 	i = 0;
-	while (i < pool->thread_count)
+	while (i < chunk_count)
 	{
 		thread_pool_add_work(pool, thread_config_list + i, sizeof(thread_config), draw_task);
 		i++;
 	}
 
 	thread_pool_wait(pool);
-}
-
-void	draw_iter_parallel(t_config config, t_surface16 iter_frame, int thread_count)
-{
-	int i;
-
-	thread_config thread_config_list[MAX_THREAD] = {};
-	pthread_t thread_list[MAX_THREAD] = {};
-	prepare_threads(config, iter_frame, thread_config_list, thread_count);
-	i = 0;
-	while (i < thread_count)
-	{
-		pthread_create(thread_list + i, NULL, draw_task, thread_config_list + i);
-		i++;
-	}
-
-	i = 0;
-	while (i < thread_count)
-	{
-		pthread_join(thread_list[i], NULL);
-		i++;
-	}
 }

@@ -186,8 +186,8 @@ void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_
 	draw_iter_region(*config, tall_dirty_rect, iter_frame);
 	draw_iter_region(*config, wide_dirty_rect, iter_frame);
 	// TODO: what about multi-threading the partial draw ?
-//	draw_iter_parallel_region(*config, iter_frame, 8, wide_dirty_rect);
-//	draw_iter_parallel_region(*config, iter_frame, 8, tall_dirty_rect);
+//	draw_iter_region_parallel(*config, iter_frame, 8, wide_dirty_rect);
+//	draw_iter_region_parallel(*config, iter_frame, 8, tall_dirty_rect);
 	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
 	draw_color_region(*config, tall_dirty_rect, color_frame, iter_frame);
 }
@@ -202,7 +202,7 @@ void	app_init(t_app *app)
 //	win_size = (t_float2){2560, 1440};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
-	app->thread_count = 4;
+	app->thread_count = 16;
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->is_dragging = false;
 	app->need_full_redraw = true;
@@ -254,12 +254,13 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-	if (app->need_full_redraw)
+	if (1 || app->need_full_redraw)
 	{
+		t_rect rect = {{}, app->iter_buffer.size};
 #if USE_THREAD_POOL
-		draw_iter_parallel_pool(app->config, app->thread_pool, app->iter_buffer);
+		draw_iter_region_parallel_pool(app->config, app->thread_pool, app->iter_buffer, rect);
 #else
-		draw_iter_parallel(app->config, app->iter_buffer, app->thread_count);
+		draw_iter_region_parallel(app->config, app->iter_buffer, app->thread_count, rect);
 #endif
 		draw_color(app->surface, app->iter_buffer, app->config);
 	}
