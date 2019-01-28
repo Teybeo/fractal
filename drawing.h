@@ -6,8 +6,8 @@
 #include "config.h"
 #include "thread_pool.h"
 
-#define MAX_THREAD 256
-#define CHUNK_HEIGHT 32
+#define MAX_THREAD 2048
+#define CHUNK_HEIGHT 64
 
 typedef struct thread_config {
 	t_config	config;

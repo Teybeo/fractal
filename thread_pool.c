@@ -8,6 +8,7 @@ void			push_work(t_work_queue **queue, t_work_queue *new_work);
 void			*run_task(void *arg);
 
 #include <stdio.h>
+
 t_thread_pool	*create_thread_pool(int thread_count)
 {
 	int				i;
@@ -34,8 +35,9 @@ t_thread_pool	*create_thread_pool(int thread_count)
 	{
 		hax_array[i].pool = pool;
 		hax_array[i].thread_id = i;
-		pthread_create(pool->thread_array + i, NULL, run_task, hax_array + i);
 //		pthread_create(pool->thread_array + i, NULL, run_task, pool);
+		pthread_create(pool->thread_array + i, NULL, run_task, hax_array + i);
+		pthread_detach(pool->thread_array[i]);
 		i++;
 	}
 	return (pool);
@@ -50,15 +52,15 @@ t_thread_pool	*create_thread_pool(int thread_count)
 
 void thread_pool_wait(t_thread_pool* pool)
 {
-	puts("Acquiring queue mutex...");
+	debug_print("%s\n", "Acquiring queue mutex...");
 	pthread_mutex_lock(&pool->queue_mutex);
 	while (pool->unfinished_work)
 	{
-		puts("Sleeping waiting for all work done!");
+		debug_print("%s\n", "Sleeping waiting for all work done!");
 		pthread_cond_wait(&pool->work_done, &pool->queue_mutex);
 	}
 	pthread_mutex_unlock(&pool->queue_mutex);
-	puts("WAIT DONE");
+	debug_print("%s\n", "WAIT DONE");
 }
 
 /*
@@ -81,7 +83,7 @@ void	thread_pool_add_work(t_thread_pool *pool, void *data, size_t data_size, voi
 	pthread_mutex_lock(&pool->queue_mutex);
 		push_work(&pool->work_queue, new);
 		pool->unfinished_work++;
-		puts("New work pushed");
+		debug_print("%s\n", "New work pushed");
 		pthread_cond_signal(&pool->work_available);
 	pthread_mutex_unlock(&pool->queue_mutex);
 }
@@ -120,26 +122,26 @@ void	*run_task(void *arg)
 //	pool = arg;
 	while (42)
 	{
-		printf(" %d  Acquiring queue mutex...\n", id);
+		debug_print(" %d  Acquiring queue mutex...\n", id);
 		pthread_mutex_lock(&pool->queue_mutex);
 			while (pool->work_queue == NULL)
 			{
-				printf(" %d  Sleeping waiting for work !\n", id);
+				debug_print(" %d  Sleeping waiting for work !\n", id);
 				pthread_cond_wait(&pool->work_available, &pool->queue_mutex);
 			}
-			printf(" %d  We got work !\n", id);
+			debug_print(" %d  We got work !\n", id);
 			work = pop_work(&pool->work_queue);
 		pthread_mutex_unlock(&pool->queue_mutex);
 
-		printf(" %d  Task running...\n", id);
+		debug_print(" %d  Task running...\n", id);
 		work->task(work->data);
-		printf(" %d  Task end !\n", id);
+		debug_print(" %d  Task end !\n", id);
 
 		pthread_mutex_lock(&pool->queue_mutex);
 			pool->unfinished_work--;
 			if (pool->unfinished_work == 0)
 			{
-				printf(" %d  No more work !\n", id);
+				debug_print(" %d  No more work !\n", id);
 				pthread_cond_signal(&pool->work_done);
 			}
 		pthread_mutex_unlock(&pool->queue_mutex);

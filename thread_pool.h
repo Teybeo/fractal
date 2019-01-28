@@ -26,4 +26,9 @@ t_thread_pool	*create_thread_pool(int thread_count);
 void			thread_pool_add_work(t_thread_pool *pool, void *data, size_t data_size, void *(*task)(void *));
 void			thread_pool_wait(t_thread_pool* thread_pool);
 
+#define POOL_DEBUG 0
+
+#define debug_print(fmt, ...) \
+            do { if (POOL_DEBUG) printf(fmt, __VA_ARGS__); } while (0)
+
 #endif

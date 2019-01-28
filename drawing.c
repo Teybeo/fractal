@@ -125,20 +125,15 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 	}
 }
 
-#define X_IS_MAJOR_AXIS 1
-#define Y_IS_MAJOR_AXIS 0
-
 void prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect)
 {
 	int		i;
-	bool	major_axis;
 	t_rect	chunk;
 
-	major_axis = (rect.size.x > rect.size.y);
 	chunk.size.x = rect.size.x;
 	if (chunk_height == 0)
 		chunk_height = (int) (rect.size.y / chunk_count);
-	printf("prepare_threads_chunks %d\norigin: %4g %4g,  size: %4g %4g\n", chunk_count, rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+//	printf("prepare_threads_chunks %d\norigin: %4g %4g,  size: %4g %4g\n", chunk_count, rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	i = 0;
 	while (i < chunk_count)
@@ -148,16 +143,12 @@ void prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chu
 
 		chunk.size.y = chunk_height;
 		int overshoot = (chunk.origin.y + chunk_height) - (rect.origin.y + rect.size.y);
-		printf("overshoot %d\n", overshoot);
 		if (overshoot > 0)
 			chunk.size.y -= overshoot;
 
-		printf("Thread: %d   ", i);
-		printf("origin: %4g %4g,  size: %4g %4g\n", chunk.origin.x, chunk.origin.y, chunk.size.x, chunk.size.y);
+//		printf("Thread: %d   ", i);
+//		printf("origin: %4g %4g,  size: %4g %4g\n", chunk.origin.x, chunk.origin.y, chunk.size.x, chunk.size.y);
 
-		if (major_axis == X_IS_MAJOR_AXIS)
-		{
-		}
 		thread_list[i].rect = chunk;
 		i++;
 	}
@@ -200,7 +191,7 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	if (rect.size.x == 0 || rect.size.y == 0)
 		return;
 
-	printf("draw_iter_region_parallel_pool\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+//	printf("draw_iter_region_parallel_pool\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
@@ -221,24 +212,14 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 
 int	get_adjusted_chunk_count(t_rect rect, int chunk_height)
 {
-	int		major_axis;
-	float	chunk_width;
 	float	temp_chunk_count;
 	int		chunk_count;
 
-	major_axis = (rect.size.x > rect.size.y);
-	if (1 || major_axis == X_IS_MAJOR_AXIS)
-	{
-		if (rect.size.y < chunk_height)
-			return (int)(rect.size.y);
-		chunk_width = rect.size.x;
-		temp_chunk_count = (rect.size.y / chunk_height);
-		printf("rect height: %d, target chunk height: %d -> %d \\ %d = %f\n", (int) rect.size.y, chunk_height,
-			   (int) rect.size.y, chunk_height, temp_chunk_count);
-		chunk_count = (int)(temp_chunk_count);
-		if (chunk_count * chunk_height < rect.size.y)
-			chunk_count++;
-		printf("Final chunk count: %d\n", chunk_count);
-	}
+	if (rect.size.y < chunk_height)
+		return (int)(rect.size.y);
+	temp_chunk_count = (rect.size.y / chunk_height);
+	chunk_count = (int)(temp_chunk_count);
+	if ((chunk_count * chunk_height) < rect.size.y)
+		chunk_count++;
 	return chunk_count;
 }
