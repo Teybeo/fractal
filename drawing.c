@@ -66,7 +66,7 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 #include <assert.h>
 #include <math.h>
 
-void	prepare_threads_chunks(thread_config *thread_list, int chunk_count, t_rect rect);
+void	prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect);
 void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame, int thread_id);
 
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
@@ -94,7 +94,7 @@ void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame
 			depth = get_mandelbrot_value(c, config.depth_max);
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
 			if (thread_id >= 0)
-				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 1) << 16;
+				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 2) << 8;
 			x++;
 		}
 		y++;
@@ -128,16 +128,16 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 #define X_IS_MAJOR_AXIS 1
 #define Y_IS_MAJOR_AXIS 0
 
-void prepare_threads_chunks(thread_config *thread_list, int chunk_count, t_rect rect)
+void prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect)
 {
 	int		i;
 	bool	major_axis;
 	t_rect	chunk;
-	int		chunk_height;
 
 	major_axis = (rect.size.x > rect.size.y);
 	chunk.size.x = rect.size.x;
-	chunk_height = (int) (rect.size.y / chunk_count);
+	if (chunk_height == 0)
+		chunk_height = (int) (rect.size.y / chunk_count);
 	printf("prepare_threads_chunks %d\norigin: %4g %4g,  size: %4g %4g\n", chunk_count, rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	i = 0;
@@ -177,7 +177,7 @@ void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thre
 	if (rect.size.y < thread_count)
 		thread_count = (int) rect.size.y;
 	prepare_threads(config, iter_frame, thread_config_list, thread_count);
-	prepare_threads_chunks(thread_config_list, thread_count, rect);
+	prepare_threads_chunks(thread_config_list, thread_count, 0, rect);
 	i = 0;
 	while (i < thread_count)
 	{
@@ -193,7 +193,7 @@ void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thre
 	}
 }
 
-int	get_adjusted_chunk_count(t_rect rect, int chunk_count);
+int	get_adjusted_chunk_count(t_rect rect, int chunk_height);
 
 void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect)
 {
@@ -204,11 +204,11 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
-	int chunk_count = get_adjusted_chunk_count(rect, 32);
+	int chunk_count = get_adjusted_chunk_count(rect, CHUNK_HEIGHT);
 	assert(chunk_count < MAX_THREAD);
 
 	prepare_threads(config, iter_frame, thread_config_list, chunk_count);
-	prepare_threads_chunks(thread_config_list, chunk_count, rect);
+	prepare_threads_chunks(thread_config_list, chunk_count, CHUNK_HEIGHT, rect);
 	i = 0;
 	while (i < chunk_count)
 	{
@@ -219,25 +219,26 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	thread_pool_wait(pool);
 }
 
-int	get_adjusted_chunk_count(t_rect rect, int chunk_count)
+int	get_adjusted_chunk_count(t_rect rect, int chunk_height)
 {
 	int		major_axis;
 	float	chunk_width;
-	float	chunk_height;
-	int		new_chunk_count;
+	float	temp_chunk_count;
+	int		chunk_count;
 
 	major_axis = (rect.size.x > rect.size.y);
-	if (major_axis == X_IS_MAJOR_AXIS)
+	if (1 || major_axis == X_IS_MAJOR_AXIS)
 	{
-		if (rect.size.y < chunk_count)
+		if (rect.size.y < chunk_height)
 			return (int)(rect.size.y);
 		chunk_width = rect.size.x;
-		chunk_height = (rect.size.y / chunk_count);
-		chunk_height = (int)(chunk_height);
-		new_chunk_count = (int)(rect.size.y / chunk_height);
-		if ((new_chunk_count * chunk_height) < rect.size.y)
-			new_chunk_count++;
-		chunk_count = new_chunk_count;
+		temp_chunk_count = (rect.size.y / chunk_height);
+		printf("rect height: %d, target chunk height: %d -> %d \\ %d = %f\n", (int) rect.size.y, chunk_height,
+			   (int) rect.size.y, chunk_height, temp_chunk_count);
+		chunk_count = (int)(temp_chunk_count);
+		if (chunk_count * chunk_height < rect.size.y)
+			chunk_count++;
+		printf("Final chunk count: %d\n", chunk_count);
 	}
 	return chunk_count;
 }
