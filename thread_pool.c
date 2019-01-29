@@ -106,12 +106,16 @@ void	thread_pool_add_work(t_thread_pool *pool, void *data, size_t data_size, voi
  * 			Send work_done signal
  * Unlock queue mutex
 */
+
 #include <stdio.h>
+#include <stdbool.h>
+
 void	*run_task(void *arg)
 {
 	t_thread_pool	*pool;
 	t_work_queue	*work;
 	int				id;
+	bool			did_work;
 
 	pool = *(t_thread_pool**)arg;
 	id = *(int*)(arg + 8);
@@ -119,11 +123,19 @@ void	*run_task(void *arg)
 	sprintf(tmp, "Thread  %d ", id);
 	pthread_setname_np(tmp);
 
+	did_work = false;
 //	pool = arg;
 	while (42)
 	{
 		debug_print(" %d  Acquiring queue mutex...\n", id);
 		pthread_mutex_lock(&pool->queue_mutex);
+			if (did_work)
+				pool->unfinished_work --;
+			if (pool->unfinished_work == 0)
+			{
+				debug_print(" %d  No more work !\n", id);
+				pthread_cond_signal(&pool->work_done);
+			}
 			while (pool->work_queue == NULL)
 			{
 				debug_print(" %d  Sleeping waiting for work !\n", id);
@@ -136,16 +148,7 @@ void	*run_task(void *arg)
 		debug_print(" %d  Task running...\n", id);
 		work->task(work->data);
 		debug_print(" %d  Task end !\n", id);
-
-		pthread_mutex_lock(&pool->queue_mutex);
-			pool->unfinished_work--;
-			if (pool->unfinished_work == 0)
-			{
-				debug_print(" %d  No more work !\n", id);
-				pthread_cond_signal(&pool->work_done);
-			}
-		pthread_mutex_unlock(&pool->queue_mutex);
-
+		did_work = true;
 		free(work->data);
 		free(work);
 	}
