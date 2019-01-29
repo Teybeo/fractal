@@ -3,17 +3,17 @@ project(fractol C)
 
 
 
-add_compile_options(-Wall -Wextra)
+add_compile_options(-Wall -Wextra -g3)
 
-add_compile_options(-fsanitize=address -g3)
-link_libraries(-fsanitize=address -g3)
+#add_compile_options(-fsanitize=address -g3)
+#link_libraries(-fsanitize=address -g3)
 
 #add_compile_options(-fsanitize=thread -g3)
 #link_libraries(-fsanitize=thread -g3)
 
 #set(CMAKE_C_FLAGS_DEBUG "-g3")
-#set(CMAKE_C_FLAGS_DEBUG "-Og")
-set(CMAKE_C_FLAGS_RELEASE "-O2 -ffast-math -flto -march=native")
+set(CMAKE_C_FLAGS_DEBUG "-Og")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -flto -march=native")
 
 set(CMAKE_C_STANDARD 99)
 
@@ -35,6 +35,24 @@ add_custom_command(
         WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}
         COMMENT "Patching mlx")
 
+if (USE_MLX)
+    target_link_libraries(fractol "-L ${CMAKE_HOME_DIRECTORY} -l mlx")
+    target_link_libraries(fractol "-framework OpenGL -framework AppKit")
+else()
+    set(MLX_SHIM_PATH "/Users/tdarchiv/42/mlx_shim")
+    target_link_libraries(fractol "-L ${MLX_SHIM_PATH}/lib -l mlx_shim")
+    target_include_directories(fractol PUBLIC "-I ${MLX_SHIM_PATH}/include")
 
-target_link_libraries(fractol "-L ${CMAKE_HOME_DIRECTORY} -l mlx")
-target_link_libraries(fractol "-framework OpenGL -framework AppKit")
+    # Add SDL2 path to list of searched paths for packages
+    set(CMAKE_PREFIX_PATH "D:/Dev/Lib/SDL2-2.0.8")
+
+    find_package(SDL2 REQUIRED)
+
+    # Stay compatible with old style find_package results
+    if (NOT TARGET SDL2::SDL2)
+        target_link_libraries(fractol ${SDL2_LIBRARIES})
+        target_include_directories(fractol PRIVATE ${SDL2_INCLUDE_DIRS})
+    else()
+        target_link_libraries(fractol SDL2::SDL2)
+    endif()
+endif()
