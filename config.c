@@ -6,7 +6,7 @@ t_config config_init(t_float2 win_size)
 	t_config	config;
 
 	aspect_ratio = win_size.x / win_size.y;
-	config.depth_max = 100;
+	config.depth_max = 1000;
 	config.z_min = (t_float2){-2 * aspect_ratio, -2};
 	config.z_max = (t_float2){2 * aspect_ratio, 2};
 	config.z_size = float2_sub(config.z_max, config.z_min);

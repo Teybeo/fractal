@@ -93,8 +93,8 @@ void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame
 //			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
 			depth = get_mandelbrot_value(c, config.depth_max);
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
-			if (thread_id >= 0)
-				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 2) << 8;
+//			if (thread_id >= 0)
+//				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 2) << 8;
 			x++;
 		}
 		y++;

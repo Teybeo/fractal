@@ -7,7 +7,7 @@
 #include "thread_pool.h"
 
 #define MAX_THREAD 2048
-#define CHUNK_HEIGHT 64
+#define CHUNK_HEIGHT 10
 
 typedef struct thread_config {
 	t_config	config;

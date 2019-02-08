@@ -24,9 +24,13 @@ set(SOURCE_FILES
         drawing.c
         config.c
         coloring.c
-        thread_pool.c)
+        thread_pool.c
+        events.c
+        delta_draw.c)
 
 add_executable(fractol ${SOURCE_FILES})
+
+target_include_directories(fractol PRIVATE ${CMAKE_HOME_DIRECTORY})
 
 add_custom_command(
         TARGET fractol
@@ -35,7 +39,9 @@ add_custom_command(
         WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}
         COMMENT "Patching mlx")
 
-if (USE_MLX)
+set(USE_MLX TRUE)
+
+if (${USE_MLX})
     target_link_libraries(fractol "-L ${CMAKE_HOME_DIRECTORY} -l mlx")
     target_link_libraries(fractol "-framework OpenGL -framework AppKit")
 else()

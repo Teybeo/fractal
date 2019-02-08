@@ -24,8 +24,8 @@ uint32_t depth_to_color(uint16_t depth, int depth_max)
 //		if (depth > config.depth_max)
 //			printf("%i at %i\n", depth, i);
 
-		int color = (255.f * (depth / (float)depth_max));
-	return (color << 8);
+//		int color = (255.f * (depth / (float)depth_max));
+//	return (color << 8);
 //		surface.pixels[i] = color << 8;
 //		assert(depth <= config.depth_max);
 	float normalized = (depth / (float)depth_max);

@@ -1,6 +1,8 @@
 #include "app.h"
 
 #include "drawing.h"
+#include "events.h"
+#include "delta_draw.h"
 
 #include <mlx.h>
 #include <stdbool.h>
@@ -11,112 +13,10 @@
 #include <math.h>
 #include <assert.h>
 
-int	quit_event()
-{
-	printf("Bye");
-	exit(0);
-	return 0;
-}
-static unsigned long frame_counter;
-
 void	app_update(t_app *app);
 void	app_draw_ui(t_app app);
 void	app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool);
-
-int	 keydown_event(int keycode, void *param)
-{
-	t_app *app;
-
-	app = param;
-	printf("Frame: %lu, %d KEYDOWN\n", frame_counter, keycode);
-	app->keystate[keycode] = true;
-	return 0;
-}
-
-int	keyup_event(int keycode, void *param)
-{
-	t_app *app;
-
-	app = param;
-	printf("Frame: %lu, %d KEYUP\n", frame_counter, keycode);
-	app->keystate[keycode] = false;
-	if (keycode == KEY_ESCAPE)
-		exit(0);
-	if (keycode == KEY_R)
-		app->config = config_init(app->surface.size);
-	if (keycode == KEY_MORE)
-		app->thread_count++;
-	if (keycode == KEY_LESS)
-		app->thread_count -= (app->thread_count != 1);
-	if (keycode == KEY_ZOOM)
-		config_zoom_factor(&app->config, ZOOM);
-	if (keycode == KEY_DEZOOM)
-		config_zoom_factor(&app->config, DEZOOM);
-	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
-			|| keycode == KEY_ZOOM || keycode == KEY_DEZOOM
-			|| keycode == KEY_R);
-	return 0;
-}
-
-int	mouse_down(int button, int x, int y, void *param)
-{
-	t_app *app;
-
-	app = param;
-	if (y < 0)
-		return (0);
-	if (button == 1)
-		app->is_dragging = true;
-	if (button == 4)
-		config_zoom_to(&app->config, x, y, app->surface.size);
-	if (button == 5)
-		config_dezoom_from(&app->config, x, y, app->surface.size);
-	app->need_full_redraw = (button == 4 || button == 5);
-
-	return 0;
-}
-
-int	mouse_up(int button, int x, int y, void *param)
-{
-	t_app *app;
-
-	x++;
-	y++;
-	app = param;
-	if (button == 1)
-		app->is_dragging = false;
-	return 0;
-}
-void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface, t_surface color_frame)
-{
-	if ((dst.y < src.y) || ((dst.y == src.y) && (dst.x < src.x)))
-	{
-		for (int y = 0; y < region_size.y; ++y)
-		{
-			for (int x = 0; x < region_size.x; ++x)
-			{
-				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
-				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
-				surface.iter[dst_index] = surface.iter[src_index];
-				color_frame.pixels[dst_index] = color_frame.pixels[src_index];
-			}
-		}
-	}
-	else
-	{
-		for (int y = region_size.y - 1; y >= 0; --y)
-		{
-			for (int x = region_size.x - 1; x >= 0; --x)
-			{
-				int src_index = (int) ((src.y + y) * surface.size.x + src.x + x);
-				int dst_index = (int) ((dst.y + y) * surface.size.x + dst.x + x);
-				surface.iter[dst_index] = surface.iter[src_index];
-				color_frame.pixels[dst_index] = color_frame.pixels[src_index];
-			}
-		}
-	}
-}
-
+float	get_frametime();
 
 int mouse_move(int x, int y, void *param)
 {
@@ -138,26 +38,6 @@ int mouse_move(int x, int y, void *param)
 	return (0);
 }
 
-t_rect	get_wide_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta)
-{
-	t_rect rect;
-	rect.size.x = frame_size.x;
-	rect.size.y = fabsf(delta.y);
-	rect.origin.x = 0;
-	rect.origin.y = (delta.y > 0) ? skip_rect.size.y : 0;
-	return rect;
-}
-
-t_rect	get_tall_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta)
-{
-	t_rect rect;
-	rect.size.x = fabsf(delta.x);
-	rect.size.y = skip_rect.size.y;
-	rect.origin.x = (delta.x > 0) ? skip_rect.size.x : 0;
-	rect.origin.y = (delta.y > 0) ? 0 : skip_rect.origin.y;
-	(void)frame_size;
-	return rect;
-}
 
 void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)
 {
@@ -198,11 +78,11 @@ void	app_init(t_app *app)
 	int			osef;
 	t_float2	win_size;
 
-//	win_size = (t_float2){1000, 1000};
 	win_size = (t_float2){2560, 1440};
+	win_size = (t_float2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
-	app->thread_count = 4;
+	app->thread_count = 8;
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->is_dragging = false;
 	app->need_full_redraw = true;
@@ -226,7 +106,6 @@ void	app_init(t_app *app)
 	mlx_loop(app->mlx_context);
 }
 
-float get_frametime();
 
 void	app_update(t_app *app)
 {
@@ -254,7 +133,6 @@ int		app_callback(void *param)
 	app = param;
 	app_update(app);
 	mlx_clear_window(app->mlx_context, app->mlx_window);
-//	if (1 || app->need_full_redraw)
 	if (app->need_full_redraw)
 	{
 		t_rect rect = {{}, app->iter_buffer.size};
@@ -263,12 +141,11 @@ int		app_callback(void *param)
 #else
 		draw_iter_region_parallel(app->config, app->iter_buffer, app->thread_count, rect);
 #endif
-		draw_color(app->surface, app->iter_buffer, app->config);
+//		draw_color(app->surface, app->iter_buffer, app->config);
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
-	frame_counter++;
-	app->need_full_redraw = false;
+//	app->need_full_redraw = false;
 	return (0);
 }
 
