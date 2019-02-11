@@ -27,7 +27,7 @@ int mouse_move(int x, int y, void *param)
 
 	app = param;
 	new_pos = (t_float2){x, y};
-	delta = float2_sub(old_pos, new_pos);
+	delta = float2_sub(new_pos, old_pos);
 	old_pos = new_pos;
 	if (app->is_dragging)
 	{
@@ -41,31 +41,22 @@ int mouse_move(int x, int y, void *param)
 
 void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)
 {
-	t_float2	src = {};
-	t_float2	dst = {};
-	t_rect		skip_rect;
+	t_float2	src;
+	t_float2	dst;
 	t_float2	region_size;
-	t_float2	z_delta;
+	t_rect		tall_dirty_rect;
+	t_rect		wide_dirty_rect;
 
-	region_size = iter_frame.size;
-	src.x = (delta.x >= 0) ? delta.x : 0;
-	src.y = (delta.y >= 0) ? delta.y : 0;
-	dst.x = (delta.x >= 0) ? 0 : -delta.x;
-	dst.y = (delta.y >= 0) ? 0 : -delta.y;
-	region_size.x -= fabsf(delta.x);
-	region_size.y -= fabsf(delta.y);
-	z_delta.x = (delta.x / iter_frame.size.x) * config->z_size.x;
-	z_delta.y = (delta.y / iter_frame.size.y) * config->z_size.y;
-	float2_add_this(&config->z_max, z_delta);
-	float2_add_this(&config->z_min, z_delta);
+	config_move_by_delta(config, delta, iter_frame.size);
+	src.x = (delta.x >= 0) ? 0 : -delta.x;
+	src.y = (delta.y >= 0) ? 0 : -delta.y;
+	dst.x = (delta.x >= 0) ? delta.x : 0;
+	dst.y = (delta.y >= 0) ? delta.y : 0;
+	region_size.x = iter_frame.size.x - fabsf(delta.x);
+	region_size.y = iter_frame.size.y - fabsf(delta.y);
 	copy_region(src, dst, region_size, iter_frame, color_frame);
-	skip_rect.origin = dst;
-	skip_rect.size = region_size;
-	t_rect tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, skip_rect, delta);
-	t_rect wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, skip_rect, delta);
-//	draw_iter_region(*config, tall_dirty_rect, iter_frame);
-//	draw_iter_region(*config, wide_dirty_rect, iter_frame);
-	// TODO: what about multi-threading the partial draw ?
+	wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, delta);
+	tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, delta);
 	draw_iter_region_parallel_pool(*config, pool, iter_frame, wide_dirty_rect);
 	draw_iter_region_parallel_pool(*config, pool, iter_frame, tall_dirty_rect);
 	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
@@ -87,7 +78,7 @@ void	app_init(t_app *app)
 	app->is_dragging = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
-	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Wireframe");
+	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
 	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
 	app->surface.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
 	app->surface.size = win_size;
@@ -114,7 +105,7 @@ void	app_update(t_app *app)
 	delta.x = app->keystate[KEY_RIGHT] - app->keystate[KEY_LEFT];
 	delta.y = app->keystate[KEY_DOWN] - app->keystate[KEY_UP];
 	delta.x *= 4;
-	delta.y *= 70;
+	delta.y *= 4;
 	if (delta.x != 0 || delta.y != 0)
 	{
 		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
@@ -141,11 +132,11 @@ int		app_callback(void *param)
 #else
 		draw_iter_region_parallel(app->config, app->iter_buffer, app->thread_count, rect);
 #endif
-//		draw_color(app->surface, app->iter_buffer, app->config);
+		draw_color(app->surface, app->iter_buffer, app->config);
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
-//	app->need_full_redraw = false;
+	app->need_full_redraw = false;
 	return (0);
 }
 

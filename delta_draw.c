@@ -1,27 +1,30 @@
 #include <math.h>
+#include <stdio.h>
 #include "config.h"
 #include "drawing.h"
 #include "coloring.h"
 
-t_rect	get_wide_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta)
+t_rect	get_wide_dirty_rect(t_float2 frame_size, t_float2 delta)
 {
-	t_rect rect;
+	t_rect	rect;
+
 	rect.size.x = frame_size.x;
 	rect.size.y = fabsf(delta.y);
 	rect.origin.x = 0;
-	rect.origin.y = (delta.y > 0) ? skip_rect.size.y : 0;
-	return rect;
+	rect.origin.y = (delta.y > 0) ? 0 : (frame_size.y - fabsf(delta.y));
+	return (rect);
 }
 
-t_rect	get_tall_dirty_rect(t_float2 frame_size, t_rect skip_rect, t_float2 delta)
+t_rect	get_tall_dirty_rect(t_float2 frame_size, t_float2 delta)
 {
-	t_rect rect;
+
+	t_rect	rect;
+
 	rect.size.x = fabsf(delta.x);
-	rect.size.y = skip_rect.size.y;
-	rect.origin.x = (delta.x > 0) ? skip_rect.size.x : 0;
-	rect.origin.y = (delta.y > 0) ? 0 : skip_rect.origin.y;
-	(void)frame_size;
-	return rect;
+	rect.size.y = (frame_size.y - fabsf(delta.y));
+	rect.origin.x = (delta.x > 0) ? 0 : (frame_size.x - fabsf(delta.x));
+	rect.origin.y = (delta.y > 0) ? delta.y : 0;
+	return (rect);
 }
 
 void	copy_region(t_float2 src, t_float2 dst, t_float2 region_size, t_surface16 surface, t_surface color_frame)

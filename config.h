@@ -24,5 +24,6 @@ t_config config_init(t_float2 win_size);
 void config_zoom_to(t_config *config, int x, int y, t_float2 win_size);
 void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size);
 void config_zoom_factor(t_config *config, float factor);
+void	config_move_by_delta(t_config *config, t_float2 delta, t_float2 win_size);
 
 #endif

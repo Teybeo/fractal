@@ -83,3 +83,13 @@ void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size)
 	config->z_max = float2_add(z_center, new_half_size);
 	config->z_size = float2_sub(config->z_max, config->z_min);
 }
+
+void	config_move_by_delta(t_config *config, t_float2 delta, t_float2 win_size)
+{
+	t_float2	z_delta;
+
+	z_delta.x = (delta.x / win_size.x) * config->z_size.x;
+	z_delta.y = (delta.y / win_size.y) * config->z_size.y;
+	float2_sub_this(&config->z_max, z_delta);
+	float2_sub_this(&config->z_min, z_delta);
+}
