@@ -1,4 +1,7 @@
+#include <stdio.h>
 #include "config.h"
+
+extern int frame_counter;
 
 t_config config_init(t_float2 win_size)
 {
@@ -24,7 +27,6 @@ void config_zoom_factor(t_config *config, float factor)
 {
 	t_float2	new_half_size;
 	t_float2	z_center;
-
 	new_half_size = float2_sub(config->z_max, config->z_min);
 	float2_mul_this(&new_half_size, 0.5f);
 	float2_mul_this(&new_half_size, factor);
@@ -46,6 +48,7 @@ void config_zoom_to(t_config *config, int x, int y, t_float2 win_size)
 	t_float2 center_to_mouse;
 	t_float2 z_mouse;
 	t_float2 z_center;
+	printf("[%d] ZOOM\n", frame_counter);
 
 	new_half_size = float2_sub(config->z_max, config->z_min);
 	float2_mul_this(&new_half_size, 0.5f);
@@ -68,6 +71,7 @@ void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size)
 	t_float2 center_to_mouse;
 	t_float2 z_mouse;
 	t_float2 z_center;
+	printf("[%d] DEZOOM\n", frame_counter);
 
 	new_half_size = float2_sub(config->z_max, config->z_min);
 	float2_mul_this(&new_half_size, 0.5f);

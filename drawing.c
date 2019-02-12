@@ -13,32 +13,22 @@ bool	is_inside_rect(t_rect rect, int x, int y)
 int	get_mandelbrot_value(t_float2 c, int depth_max)
 {
 	t_float2	z;
-//	t_float2	z_old;
 	int			depth;
 
 	depth = 0;
 	z = c;
-//	z_old = z;
-//	while (((z.x < 2 && z.x > -2) && (z.y < 2 && z.y > -2)) && (depth < depth_max))
 	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{
 		float z_y_temp = 2 * z.x * z.y + c.y;
-//		z.y = 2 * z.x * z.y + c.y;
-//		z.x = z_squared.x - z_squared.y + c.x;
 		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
 		z.y = z_y_temp;
 		depth++;
-//		if (z.x == z_old.x && z.y == z_old.y)
-//		{
-//			depth = depth_max;
-//			break;
-//		}
-//		z_old = z;
 	}
 	if (depth >= depth_max)
 		return (0);
 	return (depth);
 }
+
 #else
 int	get_mandelbrot_value(t_float2 c, int depth_max)
 {
@@ -61,6 +51,33 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 	return (depth - 1);
 }
 #endif
+
+int	get_mandewdlbrot_value(t_float2 c, int depth_max)
+{
+	t_float2	z;
+	int			depth;
+
+	depth = 0;
+	z = c;
+	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
+	{
+		float z_y_temp = 2 * z.x * z.y;
+		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
+		z.y = z_y_temp;
+//		z.x = fabs(z.x);
+//		z.y = fabs(z.y) + c.y;
+//		z.x = (int)(z.x) & (~(1 << 31));
+//		z.x = *((int*)(&z.x)) & 0x7FFFFFFF;
+//		z.y = (int)(z.y) & (~(1 << 31));
+//		z.y = *((int*)(&z.y)) & 0x7FFFFFFF;
+//		*((int*)(&z.x)) &= 0x7FFFFFFF;
+//		*((int*)(&z.y)) &= 0x7FFFFFFF;
+		depth++;
+	}
+	if (depth >= depth_max)
+		return (0);
+	return (depth);
+}
 
 #include <stdio.h>
 #include <assert.h>
@@ -159,8 +176,7 @@ void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thre
 	if (rect.size.x == 0 || rect.size.y == 0)
 		return;
 
-	printf("draw_iter_region_parallel\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
-
+//	printf("draw_iter_region_parallel\n");
 	int				i;
 	pthread_t		thread_list[MAX_THREAD] = {};
 	thread_config	thread_config_list[MAX_THREAD] = {};
@@ -191,7 +207,7 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	if (rect.size.x == 0 || rect.size.y == 0)
 		return;
 
-//	printf("draw_iter_region_parallel_pool\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+	printf("draw_iter_region_parallel_pool\n\0\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
@@ -208,6 +224,7 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	}
 
 	thread_pool_wait(pool);
+	printf("draw_iter_region_parallel_pool DONE\n");
 }
 
 int	get_adjusted_chunk_count(t_rect rect, int chunk_height)

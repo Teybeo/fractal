@@ -7,9 +7,9 @@
 int	 keydown_event(int keycode, void *param)
 {
 	t_app *app;
-
 	app = param;
 	app->keystate[keycode] = true;
+
 	return 0;
 }
 
@@ -34,6 +34,8 @@ int	keyup_event(int keycode, void *param)
 	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
 							 || keycode == KEY_ZOOM || keycode == KEY_DEZOOM
 							 || keycode == KEY_R);
+	if (app->need_full_redraw)
+		app_callback(param);
 	return 0;
 }
 
@@ -51,7 +53,8 @@ int	mouse_down(int button, int x, int y, void *param)
 	if (button == 5)
 		config_dezoom_from(&app->config, x, y, app->surface.size);
 	app->need_full_redraw = (button == 4 || button == 5);
-
+	if (app->need_full_redraw)
+		app_callback(param);
 	return 0;
 }
 
