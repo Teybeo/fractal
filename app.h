@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/08 16:53:46 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/13 17:24:33 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,28 +18,12 @@
 # include "drawing.h"
 # include "coloring.h"
 # include "thread_pool.h"
+# include "events.h"
 
 # include <stdint.h>
 # include <stdbool.h>
 
 #define USE_THREAD_POOL 1
-
-enum	e_key
-{
-	KEY_ESCAPE = 53,
-	KEY_UP = 13,
-	KEY_DOWN = 1,
-	KEY_RIGHT = 2,
-	KEY_LEFT = 0,
-	KEY_R = 15,
-	KEY_MINUS = 7,
-	KEY_PLUS = 8,
-	KEY_ZOOM = 12,
-	KEY_DEZOOM = 6,
-	KEY_LESS = 78,
-	KEY_MORE = 69,
-	KEY_LAST = 512
-};
 
 struct	s_app
 {
@@ -58,7 +42,8 @@ struct	s_app
 typedef struct s_app	t_app;
 
 void	app_init(t_app *app);
-t_app	app_run();
+void	app_run(t_app *app);
 int		app_callback(void *param);
+void	app_draw_ui(t_app app);
 
 #endif

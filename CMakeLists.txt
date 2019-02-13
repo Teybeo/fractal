@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 project(fractol C)
 
-
-
 add_compile_options(-Wall -Wextra -g3)
 
 #add_compile_options(-fsanitize=address -g3)
@@ -11,7 +9,7 @@ add_compile_options(-Wall -Wextra -g3)
 #add_compile_options(-fsanitize=thread -g3)
 #link_libraries(-fsanitize=thread -g3)
 
-#set(CMAKE_C_FLAGS_DEBUG "-g3")
+set(CMAKE_C_FLAGS_DEBUG "-g3")
 #set(CMAKE_C_FLAGS_DEBUG "-Og")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -flto -march=native")
 
@@ -26,7 +24,9 @@ set(SOURCE_FILES
         coloring.c
         thread_pool.c
         events.c
-        delta_draw.c)
+        delta_draw.c
+        mouse_events.c
+        real_drawing.c)
 
 add_executable(fractol ${SOURCE_FILES})
 

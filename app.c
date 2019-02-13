@@ -3,6 +3,7 @@
 #include "drawing.h"
 #include "events.h"
 #include "delta_draw.h"
+#include "mouse_events.h"
 
 #include <mlx.h>
 #include <stdbool.h>
@@ -12,12 +13,11 @@
 #include <memory.h>
 #include <math.h>
 #include <assert.h>
+#include <stdarg.h>
 
 void	app_update(t_app *app);
-void	app_draw_ui(t_app app);
-void	app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool);
 float	get_frametime();
-int		mouse_move(int x, int y, void *param);
+void	draw_string(t_app app, int x, int y, const char* fmt, ...);
 
 int frame_counter = 0;
 
@@ -49,57 +49,14 @@ void	app_init(t_app *app)
 	mlx_hook(app->mlx_window, 5, osef, mouse_up, app);
 	mlx_hook(app->mlx_window, 6, osef, mouse_move, app);
 	mlx_hook(app->mlx_window, 17, osef, quit_event, NULL);
-//	mlx_expose_hook(app->mlx_window, expose_callback, app);
-	mlx_loop_hook(app->mlx_context, app_callback, app);
+	mlx_expose_hook(app->mlx_window, expose_callback, app);
+//	mlx_loop_hook(app->mlx_context, app_callback, app);
+}
+
+void	app_run(t_app *app)
+{
+	app_callback(app);
 	mlx_loop(app->mlx_context);
-}
-
-
-int mouse_move(int x, int y, void *param)
-{
-	static t_float2	old_pos;
-	t_float2	new_pos;
-	t_float2	delta;
-	t_app		*app;
-
-	app = param;
-	new_pos = (t_float2){x, y};
-	delta = float2_sub(new_pos, old_pos);
-	if (app->is_dragging && (delta.x || delta.y))
-	{
-		printf("[%d] Mouse move -> Delta draw  %.0f, %.0f\n", frame_counter, delta.x, delta.y);
-		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
-		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
-		app_draw_ui(*app);
-		frame_counter++;
-	}
-	old_pos = new_pos;
-	return (0);
-}
-
-
-void app_delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)
-{
-	t_float2	src;
-	t_float2	dst;
-	t_float2	region_size;
-	t_rect		tall_dirty_rect;
-	t_rect		wide_dirty_rect;
-
-	config_move_by_delta(config, delta, iter_frame.size);
-	src.x = (delta.x >= 0) ? 0 : -delta.x;
-	src.y = (delta.y >= 0) ? 0 : -delta.y;
-	dst.x = (delta.x >= 0) ? delta.x : 0;
-	dst.y = (delta.y >= 0) ? delta.y : 0;
-	region_size.x = iter_frame.size.x - fabsf(delta.x);
-	region_size.y = iter_frame.size.y - fabsf(delta.y);
-	copy_region(src, dst, region_size, iter_frame, color_frame);
-	wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, delta);
-	tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, delta);
-	draw_iter_region_parallel_pool(*config, pool, iter_frame, wide_dirty_rect);
-	draw_iter_region_parallel_pool(*config, pool, iter_frame, tall_dirty_rect);
-	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
-	draw_color_region(*config, tall_dirty_rect, color_frame, iter_frame);
 }
 
 void	app_update(t_app *app)
@@ -112,7 +69,7 @@ void	app_update(t_app *app)
 	delta.y *= 4;
 	if (delta.x != 0 || delta.y != 0)
 	{
-		app_delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
+		delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
 	}
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 10;
@@ -149,27 +106,27 @@ int		app_callback(void *param)
 void	app_draw_ui(t_app app)
 {
 	float	time;
-	char	string[512];
 
 	time = get_frametime();
-	memset(string, 0, sizeof(string));
-	sprintf(string, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1000 / time);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 10, 0x00FFFFFF, string);
-	memset(string, 0, sizeof(string));
-	sprintf(string, "Threads: %d", app.thread_count);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 90, 0x00FFFFFF, string);
-	memset(string, 0, sizeof(string));
-	sprintf(string, "Depth max: %-5d", app.config.depth_max);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 30, 0x00FFFFFF, string);
-	memset(string, 0, sizeof(string));
-	sprintf(string, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 50, 0x00FFFFFF, string);
-	memset(string, 0, sizeof(string));
-	sprintf(string, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
-	mlx_string_put(app.mlx_context, app.mlx_window, 10, 70, 0x00FFFFFF, string);
+	draw_string(app, 10, 10, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1000 / time);
+	draw_string(app, 10, 30, "Depth max: %-5d", app.config.depth_max);
+	draw_string(app, 10, 50, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
+	draw_string(app, 10, 70, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
+	draw_string(app, 10, 90, "Threads: %d", app.thread_count);
 	if (app.need_full_redraw)
-		mlx_string_put(app.mlx_context, app.mlx_window, 10, 110, 0x00FFFFFF, "FULL REDRAW");
+		draw_string(app, 10, 110, "FULL REDRAW");
+}
 
+void	draw_string(t_app app, int x, int y, const char* fmt, ...)
+{
+	char	string[512];
+	va_list args;
+
+	va_start(args, fmt);
+	memset(string, 0, sizeof(string));
+	vsprintf(string, fmt, args);
+	mlx_string_put(app.mlx_context, app.mlx_window, x, y, 0x00FFFFFF, string);
+	va_end(args);
 }
 
 float get_frametime()

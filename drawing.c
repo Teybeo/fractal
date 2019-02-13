@@ -1,5 +1,6 @@
 #include "drawing.h"
 #include "app.h"
+#include "real_drawing.h"
 
 #include <pthread.h>
 #include <stdbool.h>
@@ -7,76 +8,6 @@
 bool	is_inside_rect(t_rect rect, int x, int y)
 {
 	return ((x > rect.origin.x) && (x < (rect.origin.x + rect.size.x)) && (y > rect.origin.y) && (y < rect.origin.y + rect.size.y));
-}
-
-#if 1
-int	get_mandelbrot_value(t_float2 c, int depth_max)
-{
-	t_float2	z;
-	int			depth;
-
-	depth = 0;
-	z = c;
-	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
-	{
-		float z_y_temp = 2 * z.x * z.y + c.y;
-		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
-		z.y = z_y_temp;
-		depth++;
-	}
-	if (depth >= depth_max)
-		return (0);
-	return (depth);
-}
-
-#else
-int	get_mandelbrot_value(t_float2 c, int depth_max)
-{
-	t_float2	z;
-	t_float2	z_squared;
-	int			depth;
-
-	depth = 0;
-	z = (t_float2){};
-	z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	while (((z_squared.x + z_squared.y) < 4) && (depth < depth_max))
-	{
-		z.y = 2 * z.x * z.y + c.y;
-		z.x = z_squared.x - z_squared.y + c.x;
-		depth++;
-		z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	}
-	if (depth == depth_max)
-		return (0);
-	return (depth - 1);
-}
-#endif
-
-int	get_mandewdlbrot_value(t_float2 c, int depth_max)
-{
-	t_float2	z;
-	int			depth;
-
-	depth = 0;
-	z = c;
-	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
-	{
-		float z_y_temp = 2 * z.x * z.y;
-		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
-		z.y = z_y_temp;
-//		z.x = fabs(z.x);
-//		z.y = fabs(z.y) + c.y;
-//		z.x = (int)(z.x) & (~(1 << 31));
-//		z.x = *((int*)(&z.x)) & 0x7FFFFFFF;
-//		z.y = (int)(z.y) & (~(1 << 31));
-//		z.y = *((int*)(&z.y)) & 0x7FFFFFFF;
-//		*((int*)(&z.x)) &= 0x7FFFFFFF;
-//		*((int*)(&z.y)) &= 0x7FFFFFFF;
-		depth++;
-	}
-	if (depth >= depth_max)
-		return (0);
-	return (depth);
 }
 
 #include <stdio.h>
@@ -108,7 +39,11 @@ void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame
 		{
 			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
 //			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
-			depth = get_mandelbrot_value(c, config.depth_max);
+			if (config.fractal_type == MANDELBROT)
+				depth = get_mandelbrot_value(c, config.depth_max);
+			else if (config.fractal_type == BURNING_SHIP)
+				depth = get_burningship_value(c, config.depth_max);
+//			else if (config.fractal_type == JULIA)
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
 //			if (thread_id >= 0)
 //				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 2) << 8;
