@@ -64,3 +64,23 @@ int	get_burningship_value(t_float2 c, int depth_max)
 		return (0);
 	return (depth);
 }
+
+#include <stdio.h>
+int	get_julia_value(t_float2 c, t_float2 z_in, int depth_max)
+{
+	t_float2	z;
+	int			depth;
+
+	depth = 0;
+	z = z_in;
+	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
+	{
+		float z_y_temp = 2 * z.x * z.y + c.y;
+		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
+		z.y = z_y_temp;
+		depth++;
+	}
+	if (depth >= depth_max)
+		return (0);
+	return (depth);
+}
