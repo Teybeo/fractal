@@ -19,14 +19,14 @@ set(SOURCE_FILES
         main.c
         app.c
         t_float2.c
-        drawing.c
+        multithreading.c
         config.c
         coloring.c
         thread_pool.c
         events.c
         delta_draw.c
         mouse_events.c
-        real_drawing.c)
+        drawing.c)
 
 add_executable(fractol ${SOURCE_FILES})
 

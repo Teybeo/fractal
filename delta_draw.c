@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "config.h"
-#include "drawing.h"
+#include "multithreading.h"
 #include "coloring.h"
 
 void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)

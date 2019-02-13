@@ -1,6 +1,6 @@
 #include "app.h"
 
-#include "drawing.h"
+#include "multithreading.h"
 #include "events.h"
 #include "delta_draw.h"
 #include "mouse_events.h"

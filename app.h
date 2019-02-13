@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/13 17:24:33 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/13 17:24:51 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include "t_float2.h"
 # include "config.h"
-# include "drawing.h"
+# include "multithreading.h"
 # include "coloring.h"
 # include "thread_pool.h"
 # include "events.h"
