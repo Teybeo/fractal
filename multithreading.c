@@ -9,21 +9,15 @@
 #include <math.h>
 
 void	prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect);
-void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame, int thread_id);
 
-void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
-{
-	draw_iter_region_debug(config, rect, iter_frame, -1);
-}
-
-void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame, int thread_id)
+void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool chunk_mask)
 {
 	int			x;
 	int			y;
 	t_float2	c;
 	int			depth;
 
-//	printf("draw_iter_region\n\0origin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+//	printf("draw_iter_region\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{
@@ -39,10 +33,8 @@ void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame
 				depth = get_burningship_value(c, config.depth_max);
 			else if (config.fractal_type == JULIA)
 				depth = get_julia_value(config.z_mouse, c, config.depth_max);
-//			else if (config.fractal_type == JULIA)
-			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
-//			if (thread_id >= 0)
-//				iter_frame.iter[(int)(y * iter_frame.size.x + x)] |= (thread_id * 2) << 8;
+			depth |= chunk_mask << 15;
+			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = (uint16_t)depth;
 			x++;
 		}
 		y++;
@@ -51,11 +43,12 @@ void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame
 
 void	*draw_task(void *param)
 {
-	thread_config	conf;
+	thread_config	cfg;
+	t_surface16		iter_frame;
 
-	conf = *(thread_config*)param;
-//	draw_iter_region(conf.config, conf.rect, (t_surface16) {conf.pixels, conf.win_size});
-	draw_iter_region_debug(conf.config, conf.rect, (t_surface16) {conf.pixels, conf.win_size}, conf.thread_id + 1);
+	cfg = *(thread_config*)param;
+	iter_frame = (t_surface16) {cfg.pixels, cfg.win_size};
+	draw_iter_region(cfg.config, cfg.rect, iter_frame, cfg.chunk_mask);
 	return NULL;
 }
 
@@ -69,6 +62,7 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 		thread_list[i].config = config;
 		thread_list[i].pixels = iter_frame.iter;
 		thread_list[i].thread_id = i;
+		thread_list[i].chunk_mask = config.show_chunks && (i % 2);
 		i++;
 	}
 }
@@ -142,11 +136,13 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
-	int chunk_count = get_adjusted_chunk_count(rect, CHUNK_HEIGHT);
+	int chunk_count = get_adjusted_chunk_count(rect, config.lines_per_chunk);
 	assert(chunk_count < MAX_THREAD);
 
+	printf("chunk_count: %d\n", chunk_count);
+
 	prepare_threads(config, iter_frame, thread_config_list, chunk_count);
-	prepare_threads_chunks(thread_config_list, chunk_count, CHUNK_HEIGHT, rect);
+	prepare_threads_chunks(thread_config_list, chunk_count, config.lines_per_chunk, rect);
 	i = 0;
 	while (i < chunk_count)
 	{

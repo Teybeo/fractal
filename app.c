@@ -30,7 +30,7 @@ void	app_init(t_app *app)
 	win_size = (t_float2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
-	app->thread_count = 8;
+	app->thread_count = THREAD_COUNT;
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->hold_left_click = false;
 	app->need_full_redraw = true;
@@ -99,7 +99,7 @@ int		app_callback(void *param)
 	}
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
-	app->need_full_redraw = false;
+//	app->need_full_redraw = false;
 	return (0);
 }
 
@@ -113,8 +113,9 @@ void	app_draw_ui(t_app app)
 	draw_string(app, 10, 50, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
 	draw_string(app, 10, 70, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
 	draw_string(app, 10, 90, "Threads: %d", app.thread_count);
+	draw_string(app, 10, 110, "Lines per chunk: %d", app.config.lines_per_chunk);
 	if (app.need_full_redraw)
-		draw_string(app, 10, 110, "FULL REDRAW");
+		draw_string(app, 10, 130, "FULL REDRAW");
 }
 
 void	draw_string(t_app app, int x, int y, const char* fmt, ...)

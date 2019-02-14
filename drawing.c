@@ -8,7 +8,7 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 	t_float2	z;
 	int			depth;
 
-	depth = 0;
+	depth = 1;
 	z = c;
 	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{
@@ -50,7 +50,7 @@ int	get_burningship_value(t_float2 c, int depth_max)
 	int			depth;
 	float		z_y_temp;
 
-	depth = 0;
+	depth = 1;
 	z = c;
 	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{
@@ -65,13 +65,12 @@ int	get_burningship_value(t_float2 c, int depth_max)
 	return (depth);
 }
 
-#include <stdio.h>
 int	get_julia_value(t_float2 c, t_float2 z_in, int depth_max)
 {
 	t_float2	z;
 	int			depth;
 
-	depth = 0;
+	depth = 1;
 	z = z_in;
 	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{

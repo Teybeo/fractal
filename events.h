@@ -9,6 +9,7 @@ enum	e_key
 	KEY_RIGHT = 2,
 	KEY_LEFT = 0,
 	KEY_R = 15,
+	KEY_G = 5,
 	KEY_MINUS = 7,
 	KEY_PLUS = 8,
 	KEY_ZOOM = 12,

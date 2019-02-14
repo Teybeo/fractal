@@ -22,6 +22,7 @@ int mouse_move(int x, int y, void *param)
 	if (app->hold_left_click && (delta.x || delta.y)) {
 		printf("[%d] Mouse move -> Delta draw  %.0f, %.0f\n", frame_counter, delta.x, delta.y);
 		delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
+		mlx_clear_window(app->mlx_context, app->mlx_window);
 		mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 		app_draw_ui(*app);
 		frame_counter++;

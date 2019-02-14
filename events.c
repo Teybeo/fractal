@@ -22,10 +22,12 @@ int	keyup_event(int keycode, void *param)
 		exit(0);
 	if (keycode == KEY_R)
 		app->config = config_init(app->surface.size);
+	if (keycode == KEY_G)
+		app->config.show_chunks ^= 1;
 	if (keycode == KEY_MORE)
-		app->thread_count++;
+		app->config.lines_per_chunk++;
 	if (keycode == KEY_LESS)
-		app->thread_count -= (app->thread_count != 1);
+		app->config.lines_per_chunk -= (app->config.lines_per_chunk != 1);
 	if (keycode == KEY_ZOOM)
 		config_zoom_factor(&app->config, ZOOM);
 	if (keycode == KEY_DEZOOM)
@@ -38,7 +40,7 @@ int	keyup_event(int keycode, void *param)
 		app->config.fractal_type = JULIA;
 	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
 							 || keycode == KEY_ZOOM || keycode == KEY_DEZOOM
-							 || keycode == KEY_R
+							 || keycode == KEY_R || keycode == KEY_G
 							 || keycode == KEY_1 || keycode == KEY_2 || keycode == KEY_3);
 	if (app->need_full_redraw)
 		app_callback(param);

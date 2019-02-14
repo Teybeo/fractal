@@ -13,17 +13,19 @@ uint32_t	rgb_pack(uint8_t r, uint8_t g, uint8_t b);
 
 uint32_t depth_to_color(uint16_t depth, int depth_max)
 {
-	static bool	init_done;
+	static bool		init_done;
 	static uint32_t	palette[PALETTE_COLOR_COUNT];
+	uint32_t		color;
+	uint32_t		chunk_mask;
 
 	if (init_done == false)
 	{
 		initPalette(palette);
 		init_done = true;
 	}
-//		if (depth > config.depth_max)
-//			printf("%i at %i\n", depth, i);
 
+	chunk_mask = (depth >> 15) * 0x22000000u;
+	depth &= ~(1 << 15);
 //		int color = (255.f * (depth / (float)depth_max));
 //	return (color << 8);
 //		surface.pixels[i] = color << 8;
@@ -38,7 +40,9 @@ uint32_t depth_to_color(uint16_t depth, int depth_max)
 //	color_index *= 2;
 //		color_index += color_index < 0;
 	color_index %= PALETTE_COLOR_COUNT;
-	return palette[color_index] * (depth != 0);
+	color = palette[color_index] * (depth != 0);
+	color |= chunk_mask;
+	return color;
 }
 
 void	draw_color_region(t_config config, t_rect rect, t_surface surface, t_surface16 iter_frame)
