@@ -16,8 +16,6 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 	draw_iter_region_debug(config, rect, iter_frame, -1);
 }
 
-extern t_float2 mouse;
-
 void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame, int thread_id)
 {
 	int			x;
@@ -40,7 +38,7 @@ void	draw_iter_region_debug(t_config config, t_rect rect, t_surface16 iter_frame
 			else if (config.fractal_type == BURNING_SHIP)
 				depth = get_burningship_value(c, config.depth_max);
 			else if (config.fractal_type == JULIA)
-				depth = get_julia_value(mouse, c, config.depth_max);
+				depth = get_julia_value(config.z_mouse, c, config.depth_max);
 //			else if (config.fractal_type == JULIA)
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = depth;
 //			if (thread_id >= 0)

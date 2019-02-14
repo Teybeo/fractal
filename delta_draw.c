@@ -22,6 +22,9 @@ void delta_draw(t_float2 delta, t_config *config, t_surface16 iter_frame, t_surf
 	region_size.x = iter_frame.size.x - fabsf(delta.x);
 	region_size.y = iter_frame.size.y - fabsf(delta.y);
 	copy_region(src, dst, region_size, iter_frame, color_frame);
+//	draw_iter_region(*config, (t_rect){{}, iter_frame.size}, iter_frame);
+//	draw_color(color_frame, iter_frame, *config);
+//	return;
 	wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, delta);
 	tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, delta);
 	draw_iter_region_parallel_pool(*config, pool, iter_frame, wide_dirty_rect);

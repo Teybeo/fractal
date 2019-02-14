@@ -36,7 +36,8 @@ struct	s_app
 	t_thread_pool	*thread_pool;
 	int				thread_count;
 	bool			keystate[KEY_LAST];
-	bool			is_dragging;
+	bool			hold_left_click;
+	bool			hold_right_click;
 	bool			need_full_redraw;
 };
 typedef struct s_app	t_app;

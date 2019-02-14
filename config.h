@@ -13,6 +13,7 @@ struct	s_config
 	t_float2	z_min;
 	t_float2	z_max;
 	t_float2	z_size;
+	t_float2	z_mouse;
 	int			fractal_type;
 };
 typedef struct s_config	t_config;

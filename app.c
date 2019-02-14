@@ -32,7 +32,7 @@ void	app_init(t_app *app)
 	app->config = config_init(win_size);
 	app->thread_count = 8;
 	app->thread_pool = create_thread_pool(app->thread_count);
-	app->is_dragging = false;
+	app->hold_left_click = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
 	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
@@ -50,7 +50,7 @@ void	app_init(t_app *app)
 	mlx_hook(app->mlx_window, 6, osef, mouse_move, app);
 	mlx_hook(app->mlx_window, 17, osef, quit_event, NULL);
 	mlx_expose_hook(app->mlx_window, expose_callback, app);
-//	mlx_loop_hook(app->mlx_context, app_callback, app);
+	mlx_loop_hook(app->mlx_context, app_callback, app);
 }
 
 void	app_run(t_app *app)
