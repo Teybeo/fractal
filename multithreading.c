@@ -10,37 +10,6 @@
 
 void	prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect);
 
-void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool chunk_mask)
-{
-	int			x;
-	int			y;
-	t_float2	c;
-	int			depth;
-
-//	printf("draw_iter_region\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
-	y = (int)rect.origin.y;
-	while (y < (rect.origin.y + rect.size.y))
-	{
-		x = (int)rect.origin.x;
-		c.y = (y / iter_frame.size.y) * (config.z_size.y) + (config.z_min.y);
-		while (x < (rect.origin.x + rect.size.x))
-		{
-			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
-//			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
-			if (config.fractal_type == MANDELBROT)
-				depth = get_mandelbrot_value(c, config.depth_max);
-			else if (config.fractal_type == BURNING_SHIP)
-				depth = get_burningship_value(c, config.depth_max);
-			else if (config.fractal_type == JULIA)
-				depth = get_julia_value(config.z_mouse, c, config.depth_max);
-			depth |= chunk_mask << 15;
-			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = (uint16_t)depth;
-			x++;
-		}
-		y++;
-	}
-}
-
 void	*draw_task(void *param)
 {
 	thread_config	cfg;
