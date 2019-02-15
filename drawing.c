@@ -21,12 +21,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool
 		{
 			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
 //			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
-			if (config.fractal_type == MANDELBROT)
-				depth = get_mandelbrot_value(c, config.depth_max);
-			else if (config.fractal_type == BURNING_SHIP)
-				depth = get_burningship_value(c, config.depth_max);
-			else if (config.fractal_type == JULIA)
-				depth = get_julia_value(config.z_mouse, c, config.depth_max);
+			depth = config.fractal_fn(c, config.depth_max, config.z_mouse);
 			depth |= chunk_mask << 15;
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = (uint16_t)depth;
 			x++;
@@ -40,12 +35,13 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 {
 	t_float2	z;
 	int			depth;
+	float		z_y_temp;
 
 	depth = 1;
 	z = c;
 	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{
-		float z_y_temp = 2 * z.x * z.y + c.y;
+		z_y_temp = (2 * z.x * z.y) + c.y;
 		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
 		z.y = z_y_temp;
 		depth++;
@@ -98,16 +94,17 @@ int	get_burningship_value(t_float2 c, int depth_max)
 	return (depth);
 }
 
-int	get_julia_value(t_float2 c, t_float2 z_in, int depth_max)
+int	get_julia_value(t_float2 z_in, int depth_max, t_float2 c)
 {
 	t_float2	z;
 	int			depth;
+	float		z_y_temp;
 
 	depth = 1;
 	z = z_in;
 	while (((z.x * z.x) + (z.y * z.y) < 4) && (depth < depth_max))
 	{
-		float z_y_temp = 2 * z.x * z.y + c.y;
+		z_y_temp = (2 * z.x * z.y) + c.y;
 		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
 		z.y = z_y_temp;
 		depth++;

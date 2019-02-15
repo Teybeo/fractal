@@ -27,7 +27,7 @@ int mouse_move(int x, int y, void *param)
 		app_draw_ui(*app);
 		frame_counter++;
 	}
-	if (app->hold_right_click && app->config.fractal_type == JULIA)
+	if (app->hold_right_click && app->config.fractal_fn == get_julia_value)
 	{
 		app->config.z_mouse = new_pos;
 		float2_remap(&app->config.z_mouse, app->iter_buffer.size, app->config.z_size, app->config.z_min);

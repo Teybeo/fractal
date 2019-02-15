@@ -33,11 +33,11 @@ int	keyup_event(int keycode, void *param)
 	if (keycode == KEY_DEZOOM)
 		config_zoom_factor(&app->config, DEZOOM);
 	if (keycode == KEY_1)
-		app->config.fractal_type = MANDELBROT;
+		app->config.fractal_fn = get_mandelbrot_value;
 	if (keycode == KEY_2)
-		app->config.fractal_type = BURNING_SHIP;
+		app->config.fractal_fn = get_burningship_value;
 	if (keycode == KEY_3)
-		app->config.fractal_type = JULIA;
+		app->config.fractal_fn = get_julia_value;
 	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
 							 || keycode == KEY_ZOOM || keycode == KEY_DEZOOM
 							 || keycode == KEY_R || keycode == KEY_G

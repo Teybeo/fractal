@@ -4,12 +4,10 @@
 #include <stdbool.h>
 #include "t_float2.h"
 
-#define MANDELBROT 0
-#define BURNING_SHIP 1
-#define JULIA 2
-
 #define DEPTH_MAX 1000
 #define LINES_PER_CHUNK 5
+
+typedef int	(*fractal_fn)();
 
 struct	s_config
 {
@@ -19,7 +17,7 @@ struct	s_config
 	t_float2	z_size;
 	t_float2	z_mouse;
 	short		lines_per_chunk;
-	int			fractal_type;
+	fractal_fn	fractal_fn;
 	bool		show_chunks;
 };
 typedef struct s_config	t_config;
@@ -31,7 +29,6 @@ typedef struct s_rect {
 
 #define ZOOM (0.5)
 #define DEZOOM (2)
-
 
 t_config	config_init(t_float2 win_size);
 void		config_zoom_to(t_config *config, int x, int y, t_float2 win_size);

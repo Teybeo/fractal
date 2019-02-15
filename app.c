@@ -85,7 +85,6 @@ int		app_callback(void *param)
 	t_app	*app;
 	app = param;
 	app_update(app);
-	mlx_clear_window(app->mlx_context, app->mlx_window);
 	if (app->need_full_redraw)
 	{
 		t_rect rect = {{}, app->iter_buffer.size};
@@ -97,6 +96,7 @@ int		app_callback(void *param)
 		draw_color(app->surface, app->iter_buffer, app->config);
 		frame_counter++;
 	}
+	mlx_clear_window(app->mlx_context, app->mlx_window);
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
 //	app->need_full_redraw = false;
