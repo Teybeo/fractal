@@ -23,7 +23,8 @@ void	*draw_task(void *param)
 
 void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thread_list, int thread_count)
 {
-	int i;
+	short i;
+
 	i = 0;
 	while (i < thread_count)
 	{
@@ -42,8 +43,6 @@ void prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chu
 	t_rect	chunk;
 
 	chunk.size.x = rect.size.x;
-	if (chunk_height == 0)
-		chunk_height = (int) (rect.size.y / chunk_count);
 //	printf("prepare_threads_chunks %d\norigin: %4g %4g,  size: %4g %4g\n", chunk_count, rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	i = 0;
@@ -65,7 +64,7 @@ void prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chu
 	}
 }
 
-void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect)
+void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, t_rect rect)
 {
 	if (rect.size.x == 0 || rect.size.y == 0)
 		return;
@@ -75,26 +74,24 @@ void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thre
 	pthread_t		thread_list[MAX_THREAD] = {};
 	thread_config	thread_config_list[MAX_THREAD] = {};
 
-	if (rect.size.y < thread_count)
-		thread_count = (int) rect.size.y;
-	prepare_threads(config, iter_frame, thread_config_list, thread_count);
-	prepare_threads_chunks(thread_config_list, thread_count, 0, rect);
+	int chunk_count = get_chunk_count(rect.size.y, config.lines_per_chunk);
+	prepare_threads(config, iter_frame, thread_config_list, chunk_count);
+	prepare_threads_chunks(thread_config_list, chunk_count, config.lines_per_chunk, rect);
 	i = 0;
-	while (i < thread_count)
+	while (i < chunk_count)
 	{
 		pthread_create(thread_list + i, NULL, draw_task, thread_config_list + i);
 		i++;
 	}
 
 	i = 0;
-	while (i < thread_count)
+	while (i < chunk_count)
 	{
 		pthread_join(thread_list[i], NULL);
 		i++;
 	}
 }
 
-int	get_adjusted_chunk_count(t_rect rect, int chunk_height);
 
 void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect)
 {
@@ -105,7 +102,7 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 
 	int				i;
 	thread_config	thread_config_list[MAX_THREAD] = {};
-	int chunk_count = get_adjusted_chunk_count(rect, config.lines_per_chunk);
+	int chunk_count = get_chunk_count(rect.size.y, config.lines_per_chunk);
 	assert(chunk_count < MAX_THREAD);
 
 	printf("chunk_count: %d\n", chunk_count);
@@ -123,16 +120,21 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	printf("draw_iter_region_parallel_pool DONE\n");
 }
 
-int	get_adjusted_chunk_count(t_rect rect, int chunk_height)
-{
-	float	temp_chunk_count;
-	int		chunk_count;
+/*
+** Divide the region in even chunks
+** If the region is not evenly divisible, add a chunk to cover the full region
+** prepare_threads_chunks() will make sure that the last chunk will not go oob
+** If we dont even have enough lines for a full chunk, report 1 line per chunk
+**/
 
-	if (rect.size.y < chunk_height)
-		return (int)(rect.size.y);
-	temp_chunk_count = (rect.size.y / chunk_height);
-	chunk_count = (int)(temp_chunk_count);
-	if ((chunk_count * chunk_height) < rect.size.y)
+int	get_chunk_count(int line_count, int lines_per_chunk)
+{
+	int	chunk_count;
+
+	if (line_count < lines_per_chunk)
+		return (line_count);
+	chunk_count = line_count / lines_per_chunk;
+	if ((chunk_count * lines_per_chunk) < line_count)
 		chunk_count++;
 	return chunk_count;
 }

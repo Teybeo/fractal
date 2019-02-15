@@ -18,7 +18,8 @@ typedef struct thread_config {
 	bool		chunk_mask;
 } thread_config;
 
-void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect);
+void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, t_rect rect);
 void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect);
+int		get_chunk_count(int line_count, int lines_per_chunk);
 
 #endif

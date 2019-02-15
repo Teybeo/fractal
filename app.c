@@ -81,7 +81,6 @@ void	app_update(t_app *app)
 
 int		app_callback(void *param)
 {
-	printf("[%d] callback\n", frame_counter);
 	t_app	*app;
 	app = param;
 	app_update(app);
@@ -91,7 +90,7 @@ int		app_callback(void *param)
 #if USE_THREAD_POOL
 		draw_iter_region_parallel_pool(app->config, app->thread_pool, app->iter_buffer, rect);
 #else
-		draw_iter_region_parallel(app->config, app->iter_buffer, app->thread_count, rect);
+		draw_iter_region_parallel(app->config, app->iter_buffer, rect);
 #endif
 		draw_color(app->surface, app->iter_buffer, app->config);
 		frame_counter++;
@@ -114,8 +113,9 @@ void	app_draw_ui(t_app app)
 	draw_string(app, 10, 70, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
 	draw_string(app, 10, 90, "Threads: %d", app.thread_count);
 	draw_string(app, 10, 110, "Lines per chunk: %d", app.config.lines_per_chunk);
+	draw_string(app, 10, 130, "Chunk count %d", get_chunk_count(app.iter_buffer.size.y, app.config.lines_per_chunk));
 	if (app.need_full_redraw)
-		draw_string(app, 10, 130, "FULL REDRAW");
+		draw_string(app, 10, 150, "FULL REDRAW");
 }
 
 void	draw_string(t_app app, int x, int y, const char* fmt, ...)

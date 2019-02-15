@@ -30,7 +30,6 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool
 	}
 }
 
-#if 1
 int	get_mandelbrot_value(t_float2 c, int depth_max)
 {
 	t_float2	z;
@@ -50,28 +49,6 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 		return (0);
 	return (depth);
 }
-#else
-int	get_mandelbrot_value(t_float2 c, int depth_max)
-{
-	t_float2	z;
-	t_float2	z_squared;
-	int			depth;
-
-	depth = 0;
-	z = (t_float2){};
-	z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	while (((z_squared.x + z_squared.y) < 4) && (depth < depth_max))
-	{
-		z.y = 2 * z.x * z.y + c.y;
-		z.x = z_squared.x - z_squared.y + c.x;
-		depth++;
-		z_squared = (t_float2){z.x * z.x, z.y * z.y};
-	}
-	if (depth == depth_max)
-		return (0);
-	return (depth - 1);
-}
-#endif
 
 int	get_burningship_value(t_float2 c, int depth_max)
 {
