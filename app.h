@@ -6,14 +6,14 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/15 16:44:04 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/18 15:06:15 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef APP_H
 # define APP_H
 
-# include "t_float2.h"
+# include "t_double2.h"
 # include "config.h"
 # include "multithreading.h"
 # include "coloring.h"

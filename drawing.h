@@ -1,7 +1,7 @@
 #ifndef FRACTOL_REAL_DRAWING_H
 #define FRACTOL_REAL_DRAWING_H
 
-#include "t_float2.h"
+#include "t_double2.h"
 #include "config.h"
 #include <stdint.h>
 

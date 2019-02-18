@@ -2,7 +2,7 @@
 # define FRACTOL_COLORING_H
 
 #include <stdint.h>
-#include "t_float2.h"
+#include "t_double2.h"
 #include "multithreading.h"
 
 struct	s_surface

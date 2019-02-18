@@ -2,7 +2,7 @@
 #define FRACTOL_CONFIG_H
 
 #include <stdbool.h>
-#include "t_float2.h"
+#include "t_double2.h"
 
 #define DEPTH_MAX 1000
 #define LINES_PER_CHUNK 5

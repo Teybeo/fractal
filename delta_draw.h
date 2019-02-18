@@ -1,7 +1,7 @@
 #ifndef FRACTOL_DELTA_DRAW_H
 #define FRACTOL_DELTA_DRAW_H
 
-#include "t_float2.h"
+#include "t_double2.h"
 #include "multithreading.h"
 #include "coloring.h"
 

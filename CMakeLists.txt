@@ -18,7 +18,7 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCE_FILES
         main.c
         app.c
-        t_float2.c
+        t_double2.c
         multithreading.c
         config.c
         coloring.c

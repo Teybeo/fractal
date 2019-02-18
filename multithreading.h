@@ -2,7 +2,7 @@
 # define DRAWING_H
 
 #include <stdint.h>
-#include "t_float2.h"
+#include "t_double2.h"
 #include "config.h"
 #include "thread_pool.h"
 #include "drawing.h"

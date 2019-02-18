@@ -1,4 +1,4 @@
-#include "t_float2.h"
+#include "t_double2.h"
 
 t_float2	float2_sub(t_float2 a, t_float2 b)
 {
