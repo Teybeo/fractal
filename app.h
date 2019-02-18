@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/18 15:06:15 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/18 15:08:20 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@
 # include <stdint.h>
 # include <stdbool.h>
 
-//#define USE_THREAD_POOL 1
-#define THREAD_COUNT 4
+#define USE_THREAD_POOL 1
+#define THREAD_COUNT 8
 
 struct	s_app
 {

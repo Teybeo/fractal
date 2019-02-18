@@ -24,10 +24,10 @@ int frame_counter = 0;
 void	app_init(t_app *app)
 {
 	int			osef;
-	t_float2	win_size;
+	t_double2	win_size;
 
-	win_size = (t_float2){2560, 1440};
-	win_size = (t_float2){1000, 1000};
+	win_size = (t_double2){2560, 1440};
+	win_size = (t_double2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
 	app->thread_count = THREAD_COUNT;
@@ -61,7 +61,7 @@ void	app_run(t_app *app)
 
 void	app_update(t_app *app)
 {
-	t_float2	delta;
+	t_double2	delta;
 
 	delta.x = app->keystate[KEY_RIGHT] - app->keystate[KEY_LEFT];
 	delta.y = app->keystate[KEY_DOWN] - app->keystate[KEY_UP];

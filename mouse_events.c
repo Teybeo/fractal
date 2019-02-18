@@ -11,14 +11,14 @@ extern int frame_counter;
 
 int mouse_move(int x, int y, void *param)
 {
-	static t_float2 old_pos;
-	t_float2 new_pos;
-	t_float2 delta;
+	static t_double2 old_pos;
+	t_double2 new_pos;
+	t_double2 delta;
 	t_app *app;
 
 	app = param;
-	new_pos = (t_float2) {x, y};
-	delta = float2_sub(new_pos, old_pos);
+	new_pos = (t_double2) {x, y};
+	delta = double2_sub(new_pos, old_pos);
 	if (app->hold_left_click && (delta.x || delta.y)) {
 		printf("[%d] Mouse move -> Delta draw  %.0f, %.0f\n", frame_counter, delta.x, delta.y);
 		delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
@@ -30,7 +30,7 @@ int mouse_move(int x, int y, void *param)
 	if (app->hold_right_click && app->config.fractal_fn == get_julia_value)
 	{
 		app->config.z_mouse = new_pos;
-		float2_remap(&app->config.z_mouse, app->iter_buffer.size, app->config.z_size, app->config.z_min);
+		double2_remap(&app->config.z_mouse, app->iter_buffer.size, app->config.z_size, app->config.z_min);
 		app->need_full_redraw = true;
 	}
 	old_pos = new_pos;
@@ -71,4 +71,3 @@ int	mouse_up(int button, int x, int y, void *param)
 		app->hold_right_click = false;
 	return 0;
 }
-

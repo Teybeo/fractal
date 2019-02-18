@@ -8,7 +8,7 @@
 struct	s_surface
 {
 	uint32_t	*pixels;
-	t_float2	size;
+	t_double2	size;
 };
 typedef struct s_surface	t_surface;
 

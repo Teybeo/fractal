@@ -23,14 +23,13 @@ uint32_t depth_to_color(uint16_t depth, int depth_max)
 		initPalette(palette);
 		init_done = true;
 	}
-
 	chunk_mask = (depth >> 15) * 0x22000000u;
 	depth &= ~(1 << 15);
-//		int color = (255.f * (depth / (float)depth_max));
+//		int color = (255.f * (depth / (double)depth_max));
 //	return (color << 8);
 //		surface.pixels[i] = color << 8;
 //		assert(depth <= config.depth_max);
-	float normalized = (depth / (float)depth_max);
+	double normalized = (depth / (double)depth_max);
 //		color_index *= 2;
 //		printf("%f -> %f\n", normalized, log2f(normalized));
 	normalized = sqrtf(normalized);

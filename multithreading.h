@@ -11,7 +11,7 @@
 
 typedef struct thread_config {
 	t_config	config;
-	t_float2	win_size;
+	t_double2	win_size;
 	uint16_t	*pixels;
 	t_rect		rect;
 	short		thread_id;

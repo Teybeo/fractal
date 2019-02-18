@@ -8,7 +8,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool
 {
 	int			x;
 	int			y;
-	t_float2	c;
+	t_double2	c;
 	int			depth;
 
 //	printf("draw_iter_region\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
@@ -30,11 +30,11 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool
 	}
 }
 
-int	get_mandelbrot_value(t_float2 c, int depth_max)
+int	get_mandelbrot_value(t_double2 c, int depth_max)
 {
-	t_float2	z;
+	t_double2	z;
 	int			depth;
-	float		z_y_temp;
+	double		z_y_temp;
 
 	depth = 1;
 	z = c;
@@ -50,11 +50,11 @@ int	get_mandelbrot_value(t_float2 c, int depth_max)
 	return (depth);
 }
 
-int	get_burningship_value(t_float2 c, int depth_max)
+int	get_burningship_value(t_double2 c, int depth_max)
 {
-	t_float2	z;
+	t_double2	z;
 	int			depth;
-	float		z_y_temp;
+	double		z_y_temp;
 
 	depth = 1;
 	z = c;
@@ -62,8 +62,8 @@ int	get_burningship_value(t_float2 c, int depth_max)
 	{
 		z_y_temp = 2 * z.x * z.y;
 		z.x = (z.x * z.x) - (z.y * z.y) + c.x;
-		z.y = fabsf(z_y_temp) + c.y;
-		z.x = fabsf(z.x);
+		z.y = fabs(z_y_temp) + c.y;
+		z.x = fabs(z.x);
 		depth++;
 	}
 	if (depth >= depth_max)
@@ -71,11 +71,11 @@ int	get_burningship_value(t_float2 c, int depth_max)
 	return (depth);
 }
 
-int	get_julia_value(t_float2 z_in, int depth_max, t_float2 c)
+int	get_julia_value(t_double2 z_in, int depth_max, t_double2 c)
 {
-	t_float2	z;
+	t_double2	z;
 	int			depth;
-	float		z_y_temp;
+	double		z_y_temp;
 
 	depth = 1;
 	z = z_in;
