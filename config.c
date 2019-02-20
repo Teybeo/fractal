@@ -1,7 +1,9 @@
 #include "config.h"
-#include "drawing.h"
+
+#include "coloring.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 extern int frame_counter;
 
@@ -9,6 +11,10 @@ t_config config_init(t_double2 win_size)
 {
 	double		aspect_ratio;
 	t_config	config;
+//	static uint32_t	palette[PALETTE_COLOR_COUNT];
+	static uint32_t *palette;
+	if (palette == NULL)
+		palette = malloc(sizeof(uint32_t) * PALETTE_COLOR_COUNT);
 
 	aspect_ratio = win_size.x / win_size.y;
 	config.depth_max = DEPTH_MAX;
@@ -18,6 +24,8 @@ t_config config_init(t_double2 win_size)
 	config.z_mouse = (t_double2){};
 	config.fractal_fn = get_mandelbrot_value;
 	config.lines_per_chunk = LINES_PER_CHUNK;
+	config.palette = palette;
+	set_palette(palette, 1);
 	return (config);
 }
 

@@ -2,6 +2,7 @@
 #define FRACTOL_CONFIG_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "t_double2.h"
 
 #define DEPTH_MAX 1000
@@ -19,13 +20,15 @@ struct	s_config
 	short		lines_per_chunk;
 	fractal_fn	fractal_fn;
 	bool		show_chunks;
+	uint32_t	*palette;
 };
 typedef struct s_config	t_config;
 
-typedef struct s_rect {
+struct s_rect {
 	t_double2 origin;
 	t_double2 size;
-} t_rect;
+};
+typedef struct s_rect	t_rect;
 
 #define ZOOM (0.5)
 #define DEZOOM (2)

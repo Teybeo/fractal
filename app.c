@@ -88,7 +88,7 @@ int		app_callback(void *param)
 	{
 		t_rect rect = {{}, app->iter_buffer.size};
 #if USE_THREAD_POOL
-		draw_iter_region_parallel_pool(app->config, app->thread_pool, app->iter_buffer, rect);
+//		draw_iter_region_parallel_pool(app->config, app->thread_pool, app->iter_buffer, rect);
 #else
 		draw_iter_region_parallel(app->config, app->iter_buffer, rect);
 #endif

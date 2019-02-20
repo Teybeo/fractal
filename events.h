@@ -19,6 +19,8 @@ enum	e_key
 	KEY_1 = 18,
 	KEY_2 = 19,
 	KEY_3 = 20,
+	KEY_KP_1 = 83,
+	KEY_KP_2 = 84,
 	KEY_LAST = 512
 };
 

@@ -26,7 +26,11 @@ set(SOURCE_FILES
         events.c
         delta_draw.c
         mouse_events.c
-        drawing.c)
+        drawing.c
+        gradient.c
+        rgb.c
+        gradient_definitions.c
+        )
 
 add_executable(fractol ${SOURCE_FILES})
 

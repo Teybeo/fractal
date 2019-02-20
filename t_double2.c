@@ -45,8 +45,8 @@ void	double2_remap(t_double2 *this, t_double2 src_size,
 t_double2	get_center(t_double2 min, t_double2 max)
 {
 	return (t_double2){
-			(max.x - min.x) / 2.f + min.x,
-			(max.y - min.y) / 2.f + min.y
+			(max.x - min.x) / 2 + min.x,
+			(max.y - min.y) / 2 + min.y
 	};
 }
 
