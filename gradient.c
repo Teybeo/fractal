@@ -11,6 +11,8 @@ t_gradient	create_gradient(int gradient_type)
 {
 	if (gradient_type == 1)
 		return (create_blue_yellow());
+	else if (gradient_type == 2)
+		return (create_random());
 	else
 		return (create_red_brown());
 }

@@ -5,5 +5,6 @@
 
 t_gradient	create_blue_yellow();
 t_gradient	create_red_brown();
+t_gradient	create_random();
 
 #endif

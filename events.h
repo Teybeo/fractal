@@ -14,6 +14,7 @@ enum	e_key
 	KEY_PLUS = 8,
 	KEY_ZOOM = 12,
 	KEY_DEZOOM = 6,
+	KEY_P = 35,
 	KEY_LESS = 78,
 	KEY_MORE = 69,
 	KEY_1 = 18,

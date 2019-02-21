@@ -43,3 +43,32 @@ t_gradient	create_red_brown()
 	gradient.step[5].color = (t_rgb){0.5, 0, 0};
 	return (gradient);
 }
+
+t_gradient	create_random()
+{
+	t_gradient	gradient;
+	float		current_treshold;
+	int			i;
+	float		treshold_divider;
+
+	gradient.step_count = 8 + rand() % 16;
+	gradient.step = malloc(sizeof(t_grad_step) * gradient.step_count);
+	i = 0;
+	current_treshold = 0;
+	while (i < gradient.step_count)
+	{
+		gradient.step[i].treshold = current_treshold;
+		gradient.step[i].color = (t_rgb){
+			(rand() % 256) / 256.,
+			(rand() % 256) / 256.,
+			(rand() % 256) / 256.};
+		current_treshold += rand();
+		i++;
+	}
+	treshold_divider = gradient.step[i - 1].treshold;
+	i = 0;
+	while (i < gradient.step_count)
+		gradient.step[i++].treshold /= treshold_divider;
+	gradient.step[i - 1].color = gradient.step[0].color;
+	return (gradient);
+}

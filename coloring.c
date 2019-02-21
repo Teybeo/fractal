@@ -20,8 +20,8 @@ uint32_t depth_to_color(uint16_t depth, int depth_max, uint32_t *palette)
 //	normalized = sqrt(normalized);
 //	normalized = sqrt(normalized);
 	color_index = (int) (normalized * (PALETTE_COLOR_COUNT - 1));
-	color_index *= 2;
-	color_index *= 2;
+//	color_index *= 2;
+//	color_index *= 2;
 	color_index %= PALETTE_COLOR_COUNT;
 	color = palette[color_index] * (depth != 0);
 	color |= chunk_mask;
@@ -52,15 +52,20 @@ void	draw_color_region(t_config config, t_rect rect, t_surface surface, t_surfac
 
 void draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
 {
-	int	i;
+	uint16_t	depth;
+	int			index;
+	int			i;
 
 	i = 0;
 	while (i < (iter_frame.size.x * iter_frame.size.y))
 	{
-		uint16_t depth = iter_frame.iter[i];
+		depth = iter_frame.iter[i];
 		surface.pixels[i] = depth_to_color(depth, config.depth_max, config.palette);
-//		int index = (int)((i / iter_frame.size.x) * PALETTE_COLOR_COUNT);
-//		surface.pixels[i] = depth_to_color(index, 0);
+		if (config.show_palette)
+		{
+			index = (int)((i / iter_frame.size.x) * PALETTE_COLOR_COUNT);
+			surface.pixels[i] = config.palette[index % PALETTE_COLOR_COUNT];
+		}
 		i++;
 	}
 }

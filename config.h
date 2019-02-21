@@ -20,6 +20,7 @@ struct	s_config
 	short		lines_per_chunk;
 	fractal_fn	fractal_fn;
 	bool		show_chunks;
+	bool		show_palette;
 	uint32_t	*palette;
 };
 typedef struct s_config	t_config;

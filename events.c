@@ -9,6 +9,7 @@ int	 keydown_event(int keycode, void *param)
 	t_app *app;
 	app = param;
 	app->keystate[keycode] = true;
+//	printf("%d\n", keycode);
 	return 0;
 }
 
@@ -24,6 +25,8 @@ int	keyup_event(int keycode, void *param)
 		app->config = config_init(app->surface.size);
 	if (keycode == KEY_G)
 		app->config.show_chunks ^= 1;
+	if (keycode == KEY_P)
+		app->config.show_palette ^= 1;
 	if (keycode == KEY_MORE)
 		app->config.lines_per_chunk++;
 	if (keycode == KEY_LESS)
@@ -44,7 +47,7 @@ int	keyup_event(int keycode, void *param)
 		set_palette(app->config.palette, 2);
 	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
 							 || keycode == KEY_ZOOM || keycode == KEY_DEZOOM
-							 || keycode == KEY_R || keycode == KEY_G
+							 || keycode == KEY_R || keycode == KEY_G || keycode == KEY_P
 							 || keycode == KEY_1 || keycode == KEY_2 || keycode == KEY_3
 							 || keycode == KEY_KP_1 || keycode == KEY_KP_2);
 	if (app->need_full_redraw)
