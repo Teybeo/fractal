@@ -26,7 +26,7 @@ enum	e_key
 };
 
 int	keydown_event(int keycode, void *param);
-int	keyup_event(int keycode, void *param);
+int	keyup_event(int key, void *param);
 int	expose_callback(void *param);
 int	quit_event();
 

@@ -13,43 +13,45 @@ int	 keydown_event(int keycode, void *param)
 	return 0;
 }
 
-int	keyup_event(int keycode, void *param)
+int	keyup_event(int key, void *param)
 {
-	t_app *app;
+	t_app		*app;
+	t_config	*config;
 
 	app = param;
-	app->keystate[keycode] = false;
-	if (keycode == KEY_ESCAPE)
+	config = &app->config;
+	app->keystate[key] = false;
+	if (key == KEY_ESCAPE)
 		exit(0);
-	if (keycode == KEY_R)
-		app->config = config_init(app->surface.size);
-	if (keycode == KEY_G)
-		app->config.show_chunks ^= 1;
-	if (keycode == KEY_P)
-		app->config.show_palette ^= 1;
-	if (keycode == KEY_MORE)
-		app->config.lines_per_chunk++;
-	if (keycode == KEY_LESS)
-		app->config.lines_per_chunk -= (app->config.lines_per_chunk != 1);
-	if (keycode == KEY_ZOOM)
-		config_zoom_factor(&app->config, ZOOM);
-	if (keycode == KEY_DEZOOM)
-		config_zoom_factor(&app->config, DEZOOM);
-	if (keycode == KEY_1)
-		app->config.fractal_fn = get_mandelbrot_value;
-	if (keycode == KEY_2)
-		app->config.fractal_fn = get_burningship_value;
-	if (keycode == KEY_3)
-		app->config.fractal_fn = get_julia_value;
-	if (keycode == KEY_KP_1)
-		set_palette(app->config.palette, 1);
-	if (keycode == KEY_KP_2)
-		set_palette(app->config.palette, 2);
-	app->need_full_redraw = (keycode == KEY_MORE || keycode == KEY_LESS
-							 || keycode == KEY_ZOOM || keycode == KEY_DEZOOM
-							 || keycode == KEY_R || keycode == KEY_G || keycode == KEY_P
-							 || keycode == KEY_1 || keycode == KEY_2 || keycode == KEY_3
-							 || keycode == KEY_KP_1 || keycode == KEY_KP_2);
+	if (key == KEY_R)
+		*config = config_init(app->surface.size);
+	if (key == KEY_G)
+		config->show_chunks ^= 1;
+	if (key == KEY_P)
+		config->show_palette ^= 1;
+	if (key == KEY_MORE)
+		config->lines_per_chunk++;
+	if (key == KEY_LESS)
+		config->lines_per_chunk -= (config->lines_per_chunk != 1);
+	if (key == KEY_ZOOM)
+		config_zoom_factor(config, ZOOM);
+	if (key == KEY_DEZOOM)
+		config_zoom_factor(config, DEZOOM);
+	if (key == KEY_1)
+		config->fractal_fn = get_mandelbrot_value;
+	if (key == KEY_2)
+		config->fractal_fn = get_burningship_value;
+	if (key == KEY_3)
+		config->fractal_fn = get_julia_value;
+	if (key == KEY_KP_1)
+		set_palette(config->palette, 1);
+	if (key == KEY_KP_2)
+		set_palette(config->palette, 2);
+	app->need_full_redraw = (key == KEY_MORE || key == KEY_LESS
+							 || key == KEY_ZOOM || key == KEY_DEZOOM
+							 || key == KEY_R || key == KEY_G || key == KEY_P
+							 || key == KEY_1 || key == KEY_2 || key == KEY_3
+							 || key == KEY_KP_1 || key == KEY_KP_2);
 	if (app->need_full_redraw)
 		app_callback(param);
 	return 0;
