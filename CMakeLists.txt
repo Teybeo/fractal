@@ -9,8 +9,8 @@ add_compile_options(-Wall -Wextra -g3)
 #add_compile_options(-fsanitize=thread -g3)
 #link_libraries(-fsanitize=thread -g3)
 
-#set(CMAKE_C_FLAGS_DEBUG "-g3")
-set(CMAKE_C_FLAGS_DEBUG "-Og")
+set(CMAKE_C_FLAGS_DEBUG "-g3")
+#set(CMAKE_C_FLAGS_DEBUG "-Og")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -flto -march=native")
 
 set(CMAKE_C_STANDARD 99)
@@ -18,24 +18,37 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCE_FILES
         main.c
         app.c
-        t_float2.c
-        drawing.c
+        t_double2.c
+        multithreading.c
         config.c
         coloring.c
-        thread_pool.c)
+        thread_pool.c
+        events.c
+        delta_draw.c
+        mouse_events.c
+        drawing.c
+        gradient.c
+        rgb.c
+        gradient_definitions.c
+        )
 
 add_executable(fractol ${SOURCE_FILES})
 
-if (USE_MLX)
+set(USE_MLX FALSE)
+
+if (${USE_MLX})
+
     add_custom_command(
             TARGET fractol
             PRE_LINK
             COMMAND sh patch_mlx.sh
             WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}
             COMMENT "Patching mlx")
+
     target_link_directories(fractol PRIVATE ${CMAKE_HOME_DIRECTORY})
     target_link_libraries(fractol mlx)
     target_link_libraries(fractol "-framework OpenGL -framework AppKit")
+
 else()
 
     set(MLX_SHIM_PATH "D:/Dev/Projets/42/mlx_shim")

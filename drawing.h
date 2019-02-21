@@ -1,31 +1,20 @@
-#ifndef DRAWING_H
-# define DRAWING_H
+#ifndef FRACTOL_REAL_DRAWING_H
+#define FRACTOL_REAL_DRAWING_H
 
-#include <stdint.h>
-#include "t_float2.h"
+#include "t_double2.h"
 #include "config.h"
-#include "thread_pool.h"
-
-#define MAX_THREAD 2048
-#define CHUNK_HEIGHT 64
-
-typedef struct thread_config {
-	t_config	config;
-	t_float2	win_size;
-	uint16_t	*pixels;
-	t_rect		rect;
-	char		thread_id;
-} thread_config;
+#include <stdint.h>
 
 struct	s_surface16
 {
 	uint16_t	*iter;
-	t_float2	size;
+	t_double2	size;
 };
 typedef struct s_surface16	t_surface16;
 
 void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame);
-void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, int thread_count, t_rect rect);
-void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect);
+int		get_mandelbrot_value(t_double2 c, int depth_max);
+int		get_burningship_value(t_double2 c, int depth_max);
+int		get_julia_value(t_double2 c, int depth_max, t_double2 z_in);
 
 #endif

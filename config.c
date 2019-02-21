@@ -1,15 +1,31 @@
 #include "config.h"
 
-t_config config_init(t_float2 win_size)
+#include "coloring.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+extern int frame_counter;
+
+t_config config_init(t_double2 win_size)
 {
-	float		aspect_ratio;
+	double		aspect_ratio;
 	t_config	config;
+//	static uint32_t	palette[PALETTE_COLOR_COUNT];
+	static uint32_t *palette;
+	if (palette == NULL)
+		palette = malloc(sizeof(uint32_t) * PALETTE_COLOR_COUNT);
 
 	aspect_ratio = win_size.x / win_size.y;
-	config.depth_max = 100;
-	config.z_min = (t_float2){-2 * aspect_ratio, -2};
-	config.z_max = (t_float2){2 * aspect_ratio, 2};
-	config.z_size = float2_sub(config.z_max, config.z_min);
+	config.depth_max = DEPTH_MAX;
+	config.z_min = (t_double2){-2 * aspect_ratio, -2};
+	config.z_max = (t_double2){2 * aspect_ratio, 2};
+	config.z_size = double2_sub(config.z_max, config.z_min);
+	config.z_mouse = (t_double2){};
+	config.fractal_fn = get_mandelbrot_value;
+	config.lines_per_chunk = LINES_PER_CHUNK;
+	config.palette = palette;
+	set_palette(palette, 0);
 	return (config);
 }
 
@@ -20,18 +36,17 @@ t_config config_init(t_float2 win_size)
 ** new_size = ((old_size / 2) * factor) * 2
 ** new_size = old_size * factor
 */
-void config_zoom_factor(t_config *config, float factor)
+void config_zoom_factor(t_config *config, double factor)
 {
-	t_float2	new_half_size;
-	t_float2	z_center;
-
-	new_half_size = float2_sub(config->z_max, config->z_min);
-	float2_mul_this(&new_half_size, 0.5f);
-	float2_mul_this(&new_half_size, factor);
+	t_double2	new_half_size;
+	t_double2	z_center;
+	new_half_size = double2_sub(config->z_max, config->z_min);
+	double2_mul_this(&new_half_size, 0.5f);
+	double2_mul_this(&new_half_size, factor);
 	z_center = get_center(config->z_min, config->z_max);
-	config->z_min = float2_sub(z_center, new_half_size);
-	config->z_max = float2_add(z_center, new_half_size);
-	config->z_size = float2_sub(config->z_max, config->z_min);
+	config->z_min = double2_sub(z_center, new_half_size);
+	config->z_max = double2_add(z_center, new_half_size);
+	config->z_size = double2_sub(config->z_max, config->z_min);
 }
 
 /*
@@ -40,46 +55,58 @@ void config_zoom_factor(t_config *config, float factor)
 ** Add the new_half_size to the new center
 **/
 
-void config_zoom_to(t_config *config, int x, int y, t_float2 win_size)
+void config_zoom_to(t_config *config, int x, int y, t_double2 win_size)
 {
-	t_float2 new_half_size;
-	t_float2 center_to_mouse;
-	t_float2 z_mouse;
-	t_float2 z_center;
+	t_double2 new_half_size;
+	t_double2 center_to_mouse;
+	t_double2 z_mouse;
+	t_double2 z_center;
+	printf("[%d] ZOOM\n", frame_counter);
 
-	new_half_size = float2_sub(config->z_max, config->z_min);
-	float2_mul_this(&new_half_size, 0.5f);
-	float2_mul_this(&new_half_size, ZOOM);
+	new_half_size = double2_sub(config->z_max, config->z_min);
+	double2_mul_this(&new_half_size, 0.5f);
+	double2_mul_this(&new_half_size, ZOOM);
 
-	z_mouse = (t_float2){x, y};
-	float2_remap(&z_mouse, win_size, config->z_size, config->z_min);
+	z_mouse = (t_double2){x, y};
+	double2_remap(&z_mouse, win_size, config->z_size, config->z_min);
 	z_center = get_center(config->z_min, config->z_max);
-	center_to_mouse = float2_sub(z_mouse, z_center);
-	float2_mul_this(&center_to_mouse, 0.5f);
-	float2_add_this(&z_center, center_to_mouse);
-	config->z_min = float2_sub(z_center, new_half_size);
-	config->z_max = float2_add(z_center, new_half_size);
-	config->z_size = float2_sub(config->z_max, config->z_min);
+	center_to_mouse = double2_sub(z_mouse, z_center);
+	double2_mul_this(&center_to_mouse, 0.5f);
+	double2_add_this(&z_center, center_to_mouse);
+	config->z_min = double2_sub(z_center, new_half_size);
+	config->z_max = double2_add(z_center, new_half_size);
+	config->z_size = double2_sub(config->z_max, config->z_min);
 }
 
-void config_dezoom_from(t_config *config, int x, int y, t_float2 win_size)
+void config_dezoom_from(t_config *config, int x, int y, t_double2 win_size)
 {
-	t_float2 new_half_size;
-	t_float2 center_to_mouse;
-	t_float2 z_mouse;
-	t_float2 z_center;
+	t_double2 new_half_size;
+	t_double2 center_to_mouse;
+	t_double2 z_mouse;
+	t_double2 z_center;
+	printf("[%d] DEZOOM\n", frame_counter);
 
-	new_half_size = float2_sub(config->z_max, config->z_min);
-	float2_mul_this(&new_half_size, 0.5f);
-	float2_mul_this(&new_half_size, DEZOOM);
+	new_half_size = double2_sub(config->z_max, config->z_min);
+	double2_mul_this(&new_half_size, 0.5f);
+	double2_mul_this(&new_half_size, DEZOOM);
 
-	z_mouse = (t_float2){x, y};
-	float2_remap(&z_mouse, win_size, config->z_size, config->z_min);
+	z_mouse = (t_double2){x, y};
+	double2_remap(&z_mouse, win_size, config->z_size, config->z_min);
 	z_center = get_center(config->z_min, config->z_max);
-	center_to_mouse = float2_sub(z_mouse, z_center);
-	float2_mul_this(&center_to_mouse, -1);
-	float2_add_this(&z_center, center_to_mouse);
-	config->z_min = float2_sub(z_center, new_half_size);
-	config->z_max = float2_add(z_center, new_half_size);
-	config->z_size = float2_sub(config->z_max, config->z_min);
+	center_to_mouse = double2_sub(z_mouse, z_center);
+	double2_mul_this(&center_to_mouse, -1);
+	double2_add_this(&z_center, center_to_mouse);
+	config->z_min = double2_sub(z_center, new_half_size);
+	config->z_max = double2_add(z_center, new_half_size);
+	config->z_size = double2_sub(config->z_max, config->z_min);
+}
+
+void	config_move_by_delta(t_config *config, t_double2 delta, t_double2 win_size)
+{
+	t_double2	z_delta;
+
+	z_delta.x = (delta.x / win_size.x) * config->z_size.x;
+	z_delta.y = (delta.y / win_size.y) * config->z_size.y;
+	double2_sub_this(&config->z_max, z_delta);
+	double2_sub_this(&config->z_min, z_delta);
 }
