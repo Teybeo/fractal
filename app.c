@@ -27,7 +27,7 @@ void	app_init(t_app *app)
 	t_double2	win_size;
 
 	win_size = (t_double2){2560, 1440};
-	win_size = (t_double2){1000, 1000};
+//	win_size = (t_double2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
 	app->thread_count = THREAD_COUNT;
@@ -68,13 +68,11 @@ void	app_update(t_app *app)
 	delta.x *= 4;
 	delta.y *= 4;
 	if (delta.x != 0 || delta.y != 0)
-	{
 		delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
-	}
 	if (app->keystate[KEY_PLUS])
-		app->config.depth_max += 10;
+		app->config.depth_max += 50;
 	if (app->keystate[KEY_MINUS])
-		app->config.depth_max -= 10 * ((app->config.depth_max - 10) >= 0);
+		app->config.depth_max -= 50 * (app->config.depth_max >= 50);
 	if (app->keystate[KEY_PLUS] || app->keystate[KEY_MINUS])
 		app->need_full_redraw = true;
 }
@@ -98,7 +96,7 @@ int		app_callback(void *param)
 	mlx_clear_window(app->mlx_context, app->mlx_window);
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
 	app_draw_ui(*app);
-//	app->need_full_redraw = false;
+	app->need_full_redraw = false;
 	return (0);
 }
 

@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "app.h"
 
 int	 keydown_event(int keycode, void *param)
@@ -43,15 +44,14 @@ int	keyup_event(int key, void *param)
 		config->fractal_fn = get_burningship_value;
 	if (key == KEY_3)
 		config->fractal_fn = get_julia_value;
-	if (key == KEY_KP_1)
-		set_palette(config->palette, 1);
-	if (key == KEY_KP_2)
-		set_palette(config->palette, 2);
+	if (key == KEY_KP_1 || key == KEY_KP_2)
+		set_palette(config->palette, key - KEY_KP_1);
 	app->need_full_redraw = (key == KEY_MORE || key == KEY_LESS
 							 || key == KEY_ZOOM || key == KEY_DEZOOM
-							 || key == KEY_R || key == KEY_G || key == KEY_P
-							 || key == KEY_1 || key == KEY_2 || key == KEY_3
-							 || key == KEY_KP_1 || key == KEY_KP_2);
+							 || key == KEY_R
+							 || key == KEY_1 || key == KEY_2 || key == KEY_3);
+	if (key == KEY_G || key == KEY_P || key == KEY_KP_1 || key == KEY_KP_2)
+		draw_color(app->surface, app->iter_buffer, app->config);
 	if (app->need_full_redraw)
 		app_callback(param);
 	return 0;

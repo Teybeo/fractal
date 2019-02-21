@@ -17,7 +17,7 @@ void	*draw_task(void *param)
 
 	cfg = *(thread_config*)param;
 	iter_frame = (t_surface16) {cfg.pixels, cfg.win_size};
-	draw_iter_region(cfg.config, cfg.rect, iter_frame, cfg.chunk_mask);
+	draw_iter_region(cfg.config, cfg.rect, iter_frame);
 	return NULL;
 }
 
@@ -32,7 +32,6 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 		thread_list[i].config = config;
 		thread_list[i].pixels = iter_frame.iter;
 		thread_list[i].thread_id = i;
-		thread_list[i].chunk_mask = config.show_chunks && (i % 2);
 		i++;
 	}
 }

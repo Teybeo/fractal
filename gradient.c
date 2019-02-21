@@ -9,9 +9,9 @@ void		get_color_interval(t_gradient gradient, float percent, t_grad_step *a, t_g
 
 t_gradient	create_gradient(int gradient_type)
 {
-	if (gradient_type == 1)
+	if (gradient_type == 0)
 		return (create_blue_yellow());
-	else if (gradient_type == 2)
+	else if (gradient_type == 1)
 		return (create_random());
 	else
 		return (create_red_brown());

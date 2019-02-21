@@ -15,7 +15,6 @@ typedef struct thread_config {
 	uint16_t	*pixels;
 	t_rect		rect;
 	short		thread_id;
-	bool		chunk_mask;
 } thread_config;
 
 void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, t_rect rect);

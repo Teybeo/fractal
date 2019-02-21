@@ -4,7 +4,7 @@
 
 #include <math.h>
 
-void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool chunk_mask)
+void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 {
 	int			x;
 	int			y;
@@ -22,7 +22,6 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame, bool
 			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
 //			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
 			depth = config.fractal_fn(c, config.depth_max, config.z_mouse);
-			depth |= chunk_mask << 15;
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = (uint16_t)depth;
 			x++;
 		}

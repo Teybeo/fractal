@@ -25,7 +25,7 @@ t_config config_init(t_double2 win_size)
 	config.fractal_fn = get_mandelbrot_value;
 	config.lines_per_chunk = LINES_PER_CHUNK;
 	config.palette = palette;
-	set_palette(palette, 1);
+	set_palette(palette, 0);
 	return (config);
 }
 
