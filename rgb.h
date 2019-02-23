@@ -1,7 +1,19 @@
-#ifndef FRACTOL_RGB_H
-#define FRACTOL_RGB_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rgb.h                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 16:29:51 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 16:29:51 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <stdint.h>
+#ifndef FRACTOL_RGB_H
+# define FRACTOL_RGB_H
+
+# include <stdint.h>
 
 # define R_SHIFT (16u)
 # define G_SHIFT (8u)

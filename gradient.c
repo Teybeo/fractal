@@ -1,11 +1,21 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   gradient.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 18:50:41 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 18:52:54 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "gradient.h"
 
 #include "gradient_definitions.h"
 
 #include <stdlib.h>
 #include <stdio.h>
-
-void		get_color_interval(t_gradient gradient, float percent, t_grad_step *a, t_grad_step *b);
 
 t_gradient	create_gradient(int gradient_type)
 {
@@ -27,10 +37,11 @@ uint32_t	get_color_from_gradient(t_gradient gradient, float percent)
 	get_color_interval(gradient, percent, &a, &b);
 	mix_factor = (percent - a.treshold) / (b.treshold - a.treshold);
 	color = color_mix(mix_factor, a.color, b.color);
-	return rgb_pack(color);
+	return (rgb_pack(color));
 }
 
-void	get_color_interval(t_gradient gradient, float percent, t_grad_step *a, t_grad_step *b)
+void		get_color_interval(t_gradient gradient, float percent,
+								t_grad_step *a, t_grad_step *b)
 {
 	t_grad_step	*step;
 	int			i;
@@ -40,14 +51,14 @@ void	get_color_interval(t_gradient gradient, float percent, t_grad_step *a, t_gr
 	while (i < (gradient.step_count - 1))
 	{
 		if (percent >= step[i].treshold && percent < step[i + 1].treshold)
-			break;
+			break ;
 		i++;
 	}
 	*a = step[i];
 	*b = step[i + 1];
 }
 
-void	destroy_gradient(t_gradient gradient)
+void		destroy_gradient(t_gradient gradient)
 {
 	free(gradient.step);
 }

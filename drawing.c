@@ -1,27 +1,37 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   drawing.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 20:15:28 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 20:16:20 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "drawing.h"
 #include "config.h"
 #include "multithreading.h"
 
 #include <math.h>
 
-void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
+void	draw_iter_region(t_config cfg, t_rect rect, t_surface16 iter_frame)
 {
 	int			x;
 	int			y;
 	t_double2	c;
 	int			depth;
 
-//	printf("draw_iter_region\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{
 		x = (int)rect.origin.x;
-		c.y = (y / iter_frame.size.y) * (config.z_size.y) + (config.z_min.y);
+		c.y = (y / iter_frame.size.y) * (cfg.z_size.y) + (cfg.z_min.y);
 		while (x < (rect.origin.x + rect.size.x))
 		{
-			c.x = (x / iter_frame.size.x) * (config.z_size.x) + (config.z_min.x);
-//			c.x = (x / surface.size.x) * (config.z_max.x - config.z_min.x) + (config.z_min.x);
-			depth = config.fractal_fn(c, config.depth_max, config.z_mouse);
+			c.x = (x / iter_frame.size.x) * (cfg.z_size.x) + (cfg.z_min.x);
+			depth = cfg.fractal_fn(c, cfg.depth_max, cfg.z_mouse);
 			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = (uint16_t)depth;
 			x++;
 		}
@@ -29,7 +39,7 @@ void	draw_iter_region(t_config config, t_rect rect, t_surface16 iter_frame)
 	}
 }
 
-int	get_mandelbrot_value(t_double2 c, int depth_max)
+int		get_mandelbrot_value(t_double2 c, int depth_max)
 {
 	t_double2	z;
 	int			depth;
@@ -49,7 +59,7 @@ int	get_mandelbrot_value(t_double2 c, int depth_max)
 	return (depth);
 }
 
-int	get_burningship_value(t_double2 c, int depth_max)
+int		get_burningship_value(t_double2 c, int depth_max)
 {
 	t_double2	z;
 	int			depth;
@@ -70,7 +80,7 @@ int	get_burningship_value(t_double2 c, int depth_max)
 	return (depth);
 }
 
-int	get_julia_value(t_double2 z_in, int depth_max, t_double2 c)
+int		get_julia_value(t_double2 z_in, int depth_max, t_double2 c)
 {
 	t_double2	z;
 	int			depth;

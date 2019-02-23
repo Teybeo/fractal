@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   gradient_definitions.c                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 18:16:05 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 18:16:23 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "gradient_definitions.h"
 
 #include <stdlib.h>
 
-t_gradient	create_blue_yellow()
+t_gradient	create_blue_yellow(void)
 {
 	t_gradient gradient;
 
@@ -23,7 +35,7 @@ t_gradient	create_blue_yellow()
 	return (gradient);
 }
 
-t_gradient	create_red_brown()
+t_gradient	create_red_brown(void)
 {
 	t_gradient	gradient;
 
@@ -44,7 +56,7 @@ t_gradient	create_red_brown()
 	return (gradient);
 }
 
-t_gradient	create_random()
+t_gradient	create_random(void)
 {
 	t_gradient	gradient;
 	float		current_treshold;

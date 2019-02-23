@@ -8,20 +8,20 @@
 #include <assert.h>
 #include <math.h>
 
-void	prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect);
+void	prepare_threads_chunks(t_thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect);
 
 void	*draw_task(void *param)
 {
-	thread_config	cfg;
+	t_thread_config	cfg;
 	t_surface16		iter_frame;
 
-	cfg = *(thread_config*)param;
+	cfg = *(t_thread_config*)param;
 	iter_frame = (t_surface16) {cfg.pixels, cfg.win_size};
 	draw_iter_region(cfg.config, cfg.rect, iter_frame);
 	return NULL;
 }
 
-void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thread_list, int thread_count)
+void	prepare_threads(t_config config, t_surface16 iter_frame, t_thread_config *thread_list, int thread_count)
 {
 	short i;
 
@@ -36,7 +36,7 @@ void	prepare_threads(t_config config, t_surface16 iter_frame, thread_config *thr
 	}
 }
 
-void prepare_threads_chunks(thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect)
+void prepare_threads_chunks(t_thread_config *thread_list, int chunk_count, int chunk_height, t_rect rect)
 {
 	int		i;
 	t_rect	chunk;
@@ -71,7 +71,7 @@ void	draw_iter_region_parallel(t_config config, t_surface16 iter_frame, t_rect r
 //	printf("draw_iter_region_parallel\n");
 	int				i;
 	pthread_t		thread_list[MAX_THREAD] = {};
-	thread_config	thread_config_list[MAX_THREAD] = {};
+	t_thread_config	thread_config_list[MAX_THREAD] = {};
 
 	int chunk_count = get_chunk_count(rect.size.y, config.lines_per_chunk);
 	prepare_threads(config, iter_frame, thread_config_list, chunk_count);
@@ -100,7 +100,7 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	printf("draw_iter_region_parallel_pool\n\0\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	int				i;
-	thread_config	thread_config_list[MAX_THREAD] = {};
+	t_thread_config	thread_config_list[MAX_THREAD] = {};
 	int chunk_count = get_chunk_count(rect.size.y, config.lines_per_chunk);
 	assert(chunk_count < MAX_THREAD);
 
@@ -111,7 +111,7 @@ void	draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surf
 	i = 0;
 	while (i < chunk_count)
 	{
-		thread_pool_add_work(pool, thread_config_list + i, sizeof(thread_config), draw_task);
+		thread_pool_add_work(pool, thread_config_list + i, sizeof(t_thread_config), draw_task);
 		i++;
 	}
 

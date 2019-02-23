@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/18 15:08:20 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/23 16:14:00 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@
 # include <stdint.h>
 # include <stdbool.h>
 
-#define USE_THREAD_POOL 1
-#define THREAD_COUNT 8
+# define USE_THREAD_POOL 1
+# define THREAD_COUNT 8
 
-struct	s_app
+struct				s_app
 {
 	void			*mlx_context;
 	void			*mlx_texture;
@@ -43,9 +43,9 @@ struct	s_app
 };
 typedef struct s_app	t_app;
 
-void	app_init(t_app *app);
-void	app_run(t_app *app);
-int		app_callback(void *param);
-void	app_draw_ui(t_app app);
+void				app_init(t_app *app);
+void				app_run(t_app *app);
+int					app_callback(void *param);
+void				app_draw_ui(t_app app);
 
 #endif

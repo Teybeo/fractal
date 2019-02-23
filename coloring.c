@@ -1,10 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   coloring.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 20:25:28 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 20:26:45 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "coloring.h"
 
 #include "gradient.h"
 
 #include <math.h>
 
-uint32_t depth_to_color(uint16_t depth, int depth_max, uint32_t *palette)
+uint32_t	depth_to_color(uint16_t depth, int depth_max, uint32_t *palette)
 {
 	uint32_t	color;
 	float		normalized;
@@ -15,37 +27,39 @@ uint32_t depth_to_color(uint16_t depth, int depth_max, uint32_t *palette)
 	normalized = sinf(((float)M_PI * normalized) / 2);
 //	normalized = sqrt(normalized);
 //	normalized = sqrt(normalized);
-	color_index = (int) (normalized * (PALETTE_COLOR_COUNT - 1));
+	color_index = (int)(normalized * (PALETTE_COLOR_COUNT - 1));
 //	color_index *= 2;
 //	color_index *= 2;
 	color_index %= PALETTE_COLOR_COUNT;
 	color = palette[color_index] * (depth != 0);
-	return color;
+	return (color);
 }
 
-void	draw_color_region(t_config config, t_rect rect, t_surface surface, t_surface16 iter_frame)
+void		draw_color_region(t_config cfg, t_rect rect, t_surface surface, t_surface16 iter_frame)
 {
-	int	x;
-	int	y;
+	uint16_t	depth;
+	int			x;
+	int			y;
+	int			i;
 
 	if (rect.size.x == 0 || rect.size.y == 0)
-		return;
+		return ;
 	y = (int)rect.origin.y;
 	while (y < (rect.origin.y + rect.size.y))
 	{
 		x = (int)rect.origin.x;
 		while (x < (rect.origin.x + rect.size.x))
 		{
-			int i = (int)(y * iter_frame.size.x + x);
-			uint16_t depth = iter_frame.iter[i];
-			surface.pixels[i] = depth_to_color(depth, config.depth_max, config.palette);
+			i = (int)(y * iter_frame.size.x + x);
+			depth = iter_frame.iter[i];
+			surface.pixels[i] = depth_to_color(depth, cfg.depth_max, cfg.palette);
 			x++;
 		}
 		y++;
 	}
 }
 
-void draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
+void		draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
 {
 	uint32_t	color;
 	int			i;
@@ -70,7 +84,7 @@ void draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
 	}
 }
 
-void set_palette(uint32_t *palette, int gradient_type)
+void		set_palette(uint32_t *palette, int gradient_type)
 {
 	int			i;
 	float		percent;

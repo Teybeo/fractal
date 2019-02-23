@@ -52,15 +52,15 @@ t_thread_pool	*create_thread_pool(int thread_count)
 
 void thread_pool_wait(t_thread_pool* pool)
 {
-	debug_print("%s\n", "Acquiring queue mutex...");
+	DEBUG_PRINT("%s\n", "Acquiring queue mutex...");
 	pthread_mutex_lock(&pool->queue_mutex);
 	while (pool->unfinished_work)
 	{
-		debug_print("%s\n", "Sleeping waiting for all work done!");
+		DEBUG_PRINT("%s\n", "Sleeping waiting for all work done!");
 		pthread_cond_wait(&pool->work_done, &pool->queue_mutex);
 	}
 	pthread_mutex_unlock(&pool->queue_mutex);
-	debug_print("%s\n", "WAIT DONE");
+	DEBUG_PRINT("%s\n", "WAIT DONE");
 }
 
 /*
@@ -83,7 +83,7 @@ void	thread_pool_add_work(t_thread_pool *pool, void *data, size_t data_size, voi
 	pthread_mutex_lock(&pool->queue_mutex);
 		push_work(&pool->work_queue, new);
 		pool->unfinished_work++;
-		debug_print("%s\n", "New work pushed");
+		DEBUG_PRINT("%s\n", "New work pushed");
 		pthread_cond_signal(&pool->work_available);
 	pthread_mutex_unlock(&pool->queue_mutex);
 }
@@ -127,27 +127,27 @@ void	*run_task(void *arg)
 //	pool = arg;
 	while (42)
 	{
-		debug_print(" %d  Acquiring queue mutex...\n", id);
+		DEBUG_PRINT(" %d  Acquiring queue mutex...\n", id);
 		pthread_mutex_lock(&pool->queue_mutex);
 			if (did_work)
 				pool->unfinished_work --;
 			if (pool->unfinished_work == 0)
 			{
-				debug_print(" %d  No more work !\n", id);
+				DEBUG_PRINT(" %d  No more work !\n", id);
 				pthread_cond_signal(&pool->work_done);
 			}
 			while (pool->work_queue == NULL)
 			{
-				debug_print(" %d  Sleeping waiting for work !\n", id);
+				DEBUG_PRINT(" %d  Sleeping waiting for work !\n", id);
 				pthread_cond_wait(&pool->work_available, &pool->queue_mutex);
 			}
-			debug_print(" %d  We got work !\n", id);
+			DEBUG_PRINT(" %d  We got work !\n", id);
 			work = pop_work(&pool->work_queue);
 		pthread_mutex_unlock(&pool->queue_mutex);
 
-		debug_print(" %d  Task running...\n", id);
+		DEBUG_PRINT(" %d  Task running...\n", id);
 		work->task(work->data);
-		debug_print(" %d  Task end !\n", id);
+		DEBUG_PRINT(" %d  Task end !\n", id);
 		did_work = true;
 		free(work->data);
 		free(work);

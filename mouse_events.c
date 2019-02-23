@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   mouse_events.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 18:09:10 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 18:09:52 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "mouse_events.h"
 
 #include "t_double2.h"
@@ -9,17 +21,18 @@
 
 extern int frame_counter;
 
-int mouse_move(int x, int y, void *param)
+int	mouse_move(int x, int y, void *param)
 {
-	static t_double2 old_pos;
-	t_double2 new_pos;
-	t_double2 delta;
-	t_app *app;
+	static t_double2	old_pos;
+	t_double2			new_pos;
+	t_double2			delta;
+	t_app				*app;
 
 	app = param;
 	new_pos = (t_double2) {x, y};
 	delta = double2_sub(new_pos, old_pos);
-	if (app->hold_left_click && (delta.x || delta.y)) {
+	if (app->hold_left_click && (delta.x || delta.y))
+	{
 		printf("[%d] Mouse move -> Delta draw  %.0f, %.0f\n", frame_counter, delta.x, delta.y);
 		delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
 		mlx_clear_window(app->mlx_context, app->mlx_window);
@@ -55,7 +68,7 @@ int	mouse_down(int button, int x, int y, void *param)
 	app->need_full_redraw = (button == 4 || button == 5);
 	if (app->need_full_redraw)
 		app_callback(param);
-	return 0;
+	return (0);
 }
 
 int	mouse_up(int button, int x, int y, void *param)
@@ -69,5 +82,5 @@ int	mouse_up(int button, int x, int y, void *param)
 		app->hold_left_click = false;
 	if (button == 2)
 		app->hold_right_click = false;
-	return 0;
+	return (0);
 }

@@ -19,6 +19,7 @@ set(SOURCE_FILES
         main.c
         app.c
         t_double2.c
+        t_double2_util.c
         multithreading.c
         config.c
         coloring.c

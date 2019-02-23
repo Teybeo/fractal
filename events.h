@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   events.h                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/23 16:59:00 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/23 16:59:00 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef EVENTS_H
 # define EVENTS_H
 
@@ -28,6 +40,6 @@ enum	e_key
 int	keydown_event(int keycode, void *param);
 int	keyup_event(int key, void *param);
 int	expose_callback(void *param);
-int	quit_event();
+int	quit_event(void);
 
 #endif
