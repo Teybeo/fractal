@@ -35,24 +35,28 @@ set(SOURCE_FILES
 
 add_executable(fractol ${SOURCE_FILES})
 
-target_include_directories(fractol PRIVATE ${CMAKE_HOME_DIRECTORY})
-
-add_custom_command(
-        TARGET fractol
-        PRE_LINK
-        COMMAND sh patch_mlx.sh
-        WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}
-        COMMENT "Patching mlx")
-
-set(USE_MLX TRUE)
+set(USE_MLX FALSE)
 
 if (${USE_MLX})
-    target_link_libraries(fractol "-L ${CMAKE_HOME_DIRECTORY} -l mlx")
+
+    add_custom_command(
+            TARGET fractol
+            PRE_LINK
+            COMMAND sh patch_mlx.sh
+            WORKING_DIRECTORY ${CMAKE_HOME_DIRECTORY}
+            COMMENT "Patching mlx")
+
+    target_link_directories(fractol PRIVATE ${CMAKE_HOME_DIRECTORY})
+    target_link_libraries(fractol mlx)
     target_link_libraries(fractol "-framework OpenGL -framework AppKit")
+
 else()
-    set(MLX_SHIM_PATH "/Users/tdarchiv/42/mlx_shim")
-    target_link_libraries(fractol "-L ${MLX_SHIM_PATH}/lib -l mlx_shim")
-    target_include_directories(fractol PUBLIC "-I ${MLX_SHIM_PATH}/include")
+
+    set(MLX_SHIM_PATH "D:/Dev/Projets/42/mlx_shim")
+
+    target_include_directories(fractol PUBLIC ${MLX_SHIM_PATH}/include)
+    target_link_directories(fractol PRIVATE ${MLX_SHIM_PATH}/lib)
+    target_link_libraries(fractol mlx_shim)
 
     # Add SDL2 path to list of searched paths for packages
     set(CMAKE_PREFIX_PATH "D:/Dev/Lib/SDL2-2.0.8")

@@ -26,8 +26,8 @@ void	app_init(t_app *app)
 	int			osef;
 	t_double2	win_size;
 
-	win_size = (t_double2){2560, 1440};
-//	win_size = (t_double2){1000, 1000};
+//	win_size = (t_double2){2560, 1440};
+	win_size = (t_double2){1000, 1000};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
 	app->thread_count = THREAD_COUNT;
