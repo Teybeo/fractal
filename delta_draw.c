@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 20:24:43 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/23 21:01:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/24 18:25:18 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void	delta_draw(t_double2 delta, t_config *config, t_surface16 iter_frame, t_sur
 	t_rect		tall_dirty_rect;
 	t_rect		wide_dirty_rect;
 
-	config_move_by_delta(config, delta, iter_frame.size);
+	config_move_by(config, delta, iter_frame.size);
 	src.x = (delta.x >= 0) ? 0 : -delta.x;
 	src.y = (delta.y >= 0) ? 0 : -delta.y;
 	dst.x = (delta.x >= 0) ? delta.x : 0;
@@ -36,10 +36,10 @@ void	delta_draw(t_double2 delta, t_config *config, t_surface16 iter_frame, t_sur
 	copy_region(src, dst, region_size, iter_frame, color_frame);
 	wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, delta);
 	tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, delta);
-	draw_iter_region_parallel_pool(*config, pool, iter_frame, wide_dirty_rect);
-	draw_iter_region_parallel_pool(*config, pool, iter_frame, tall_dirty_rect);
-	draw_color_region(*config, wide_dirty_rect, color_frame, iter_frame);
-	draw_color_region(*config, tall_dirty_rect, color_frame, iter_frame);
+	compute_region_parallel(*config, pool, iter_frame, wide_dirty_rect);
+	compute_region_parallel(*config, pool, iter_frame, tall_dirty_rect);
+	draw_color_region(*config, color_frame, iter_frame, wide_dirty_rect);
+	draw_color_region(*config, color_frame, iter_frame, tall_dirty_rect);
 }
 
 t_rect	get_wide_dirty_rect(t_double2 frame_size, t_double2 delta)

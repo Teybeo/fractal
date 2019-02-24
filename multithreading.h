@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 16:51:20 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/23 21:01:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/24 18:21:17 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@ typedef struct	s_thread_config {
 	short		thread_id;
 }				t_thread_config;
 
-void			draw_iter_region_parallel(t_config config, t_surface16 iter_frame, t_rect rect);
-void			draw_iter_region_parallel_pool(t_config config, t_thread_pool *pool, t_surface16 iter_frame, t_rect rect);
+void			compute_region_parallel(t_config confg, t_thread_pool *pool,
+		t_surface16 iter_frame, t_rect rect);
 int				get_chunk_count(int line_count, int lines_per_chunk);
 
 #endif

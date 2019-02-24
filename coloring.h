@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 17:32:07 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/23 21:01:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/24 18:32:49 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,10 @@ typedef struct s_surface	t_surface;
 
 # define PALETTE_COLOR_COUNT 4096
 
-void			draw_color(t_surface surface, t_surface16 iter_frame, t_config config);
-void			draw_color_region(t_config cfg, t_rect rect, t_surface surface, t_surface16 iter_frame);
+void			draw_color(t_config config,
+		t_surface surface, t_surface16 iter_frame);
+void			draw_color_region(t_config cfg,
+		t_surface surface, t_surface16 iter_frame, t_rect rect);
 void			set_palette(uint32_t *palette, int gradient_type);
 
 #endif

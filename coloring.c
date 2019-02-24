@@ -35,7 +35,7 @@ uint32_t	depth_to_color(uint16_t depth, int depth_max, uint32_t *palette)
 	return (color);
 }
 
-void		draw_color_region(t_config cfg, t_rect rect, t_surface surface, t_surface16 iter_frame)
+void draw_color_region(t_config cfg, t_surface surface, t_surface16 iter_frame, t_rect rect)
 {
 	uint16_t	depth;
 	int			x;
@@ -59,7 +59,7 @@ void		draw_color_region(t_config cfg, t_rect rect, t_surface surface, t_surface1
 	}
 }
 
-void		draw_color(t_surface surface, t_surface16 iter_frame, t_config config)
+void draw_color(t_config config, t_surface surface, t_surface16 iter_frame)
 {
 	uint32_t	color;
 	int			i;

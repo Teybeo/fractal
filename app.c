@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   app.c                                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/02/24 18:25:18 by tdarchiv         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "app.h"
 
 #include "multithreading.h"
@@ -15,19 +27,12 @@
 #include <assert.h>
 #include <stdarg.h>
 
-void	app_update(t_app *app);
-float	get_frametime();
-void	draw_string(t_app app, int x, int y, const char* fmt, ...);
-
-int frame_counter = 0;
-
 void	app_init(t_app *app)
 {
 	int			osef;
 	t_double2	win_size;
 
-//	win_size = (t_double2){2560, 1440};
-	win_size = (t_double2){1000, 1000};
+	win_size = (t_double2){WIDTH, HEIGHT};
 	app->mlx_context = mlx_init();
 	app->config = config_init(win_size);
 	app->thread_count = THREAD_COUNT;
@@ -80,18 +85,15 @@ void	app_update(t_app *app)
 int		app_callback(void *param)
 {
 	t_app	*app;
+	t_rect	rect;
+
 	app = param;
 	app_update(app);
-	if (app->need_full_redraw)
+	if (1 || app->need_full_redraw)
 	{
-		t_rect rect = {{}, app->iter_buffer.size};
-#if USE_THREAD_POOL
-		draw_iter_region_parallel_pool(app->config, app->thread_pool, app->iter_buffer, rect);
-#else
-		draw_iter_region_parallel(app->config, app->iter_buffer, rect);
-#endif
-		draw_color(app->surface, app->iter_buffer, app->config);
-		frame_counter++;
+		rect = (t_rect){{0, 0}, app->iter_buffer.size};
+		compute_region_parallel(app->config, app->thread_pool, app->iter_buffer, rect);
+		draw_color(app->config, app->surface, app->iter_buffer);
 	}
 	mlx_clear_window(app->mlx_context, app->mlx_window);
 	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
@@ -116,7 +118,7 @@ void	app_draw_ui(t_app app)
 		draw_string(app, 10, 150, "FULL REDRAW");
 }
 
-void	draw_string(t_app app, int x, int y, const char* fmt, ...)
+void	draw_string(t_app app, int x, int y, const char *fmt, ...)
 {
 	char	string[512];
 	va_list args;
@@ -128,16 +130,15 @@ void	draw_string(t_app app, int x, int y, const char* fmt, ...)
 	va_end(args);
 }
 
-float get_frametime()
+float	get_frametime(void)
 {
-	static struct timespec	start = {};
-	struct timespec			now = {};
+	static struct timespec	start = {0, 0};
+	struct timespec			now;
 	float					duration;
 
-	clock_gettime (CLOCK_REALTIME, &now);
+	clock_gettime(CLOCK_REALTIME, &now);
 	duration = (now.tv_sec - start.tv_sec) * 1000
 			+ (now.tv_nsec - start.tv_nsec) / 1000000.f;
 	start = now;
 	return (duration);
 }
-

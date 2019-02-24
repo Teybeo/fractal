@@ -35,7 +35,7 @@ set(SOURCE_FILES
 
 add_executable(fractol ${SOURCE_FILES})
 
-set(USE_MLX FALSE)
+set(USE_MLX TRUE)
 
 if (${USE_MLX})
 

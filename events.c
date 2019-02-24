@@ -56,7 +56,7 @@ int		keyup_event(int key, void *param)
 		set_palette(cfg->palette, key - KEY_KP_1);
 	app->need_full_redraw = is_full_redraw_key_event(key);
 	if (key == KEY_G || key == KEY_P || key == KEY_KP_1 || key == KEY_KP_2)
-		draw_color(app->surface, app->iter_buffer, app->config);
+		draw_color(app->config, app->surface, app->iter_buffer);
 	if (app->need_full_redraw)
 		app_callback(param);
 	return (0);

@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-void	draw_iter_region(t_config cfg, t_rect rect, t_surface16 iter_frame)
+void	compute_region(t_config cfg, t_rect rect, t_surface16 iter_frame)
 {
 	int			x;
 	int			y;
