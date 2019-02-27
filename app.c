@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/24 18:25:18 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,15 +89,14 @@ int		app_callback(void *param)
 
 	app = param;
 	app_update(app);
-	if (1 || app->need_full_redraw)
+//	if (1 || app->need_full_redraw)
+	if (app->need_full_redraw)
 	{
 		rect = (t_rect){{0, 0}, app->iter_buffer.size};
 		compute_region_parallel(app->config, app->thread_pool, app->iter_buffer, rect);
 		draw_color(app->config, app->surface, app->iter_buffer);
 	}
-	mlx_clear_window(app->mlx_context, app->mlx_window);
-	mlx_put_image_to_window(app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
-	app_draw_ui(*app);
+	draw_screen(app);
 	app->need_full_redraw = false;
 	return (0);
 }
@@ -116,6 +115,14 @@ void	app_draw_ui(t_app app)
 	draw_string(app, 10, 130, "Chunk count %d", get_chunk_count(app.iter_buffer.size.y, app.config.lines_per_chunk));
 	if (app.need_full_redraw)
 		draw_string(app, 10, 150, "FULL REDRAW");
+}
+
+void	draw_screen(t_app *app)
+{
+	mlx_clear_window(app->mlx_context, app->mlx_window);
+	mlx_put_image_to_window(
+			app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
+	app_draw_ui(*app);
 }
 
 void	draw_string(t_app app, int x, int y, const char *fmt, ...)

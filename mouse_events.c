@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 18:09:10 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/24 17:30:43 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,9 @@
 
 #include <stdio.h>
 #include <mlx.h>
+#include <math.h>
 
-int	mouse_move(int x, int y, void *param)
+int		mouse_move(int x, int y, void *param)
 {
 	static t_double2	old_pos;
 	t_double2			new_pos;
@@ -31,12 +32,9 @@ int	mouse_move(int x, int y, void *param)
 	delta = double2_sub(new_pos, old_pos);
 	if (app->hold_left_click && (delta.x || delta.y))
 	{
-		delta_draw(delta, &app->config, app->iter_buffer, app->surface,
+		try_delta_draw(delta, &app->config, app->iter_buffer, app->surface,
 				app->thread_pool);
-		mlx_clear_window(app->mlx_context, app->mlx_window);
-		mlx_put_image_to_window(
-				app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
-		app_draw_ui(*app);
+		draw_screen(app);
 	}
 	if (app->hold_right_click && app->config.fractal_fn == get_julia_value)
 	{
@@ -49,7 +47,7 @@ int	mouse_move(int x, int y, void *param)
 	return (0);
 }
 
-int	mouse_down(int button, int x, int y, void *param)
+int		mouse_down(int button, int x, int y, void *param)
 {
 	t_app *app;
 
@@ -70,7 +68,7 @@ int	mouse_down(int button, int x, int y, void *param)
 	return (0);
 }
 
-int	mouse_up(int button, int x, int y, void *param)
+int		mouse_up(int button, int x, int y, void *param)
 {
 	t_app *app;
 

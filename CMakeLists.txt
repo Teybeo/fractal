@@ -3,15 +3,15 @@ project(fractol C)
 
 add_compile_options(-Wall -Wextra -g3)
 
-#add_compile_options(-fsanitize=address -g3)
-#link_libraries(-fsanitize=address -g3)
+add_compile_options(-fsanitize=address -g3)
+link_libraries(-fsanitize=address -g3)
 
 #add_compile_options(-fsanitize=thread -g3)
 #link_libraries(-fsanitize=thread -g3)
 
 set(CMAKE_C_FLAGS_DEBUG "-g3")
 #set(CMAKE_C_FLAGS_DEBUG "-Og")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -flto -march=native")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -march=native")
 
 set(CMAKE_C_STANDARD 99)
 

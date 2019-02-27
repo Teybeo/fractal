@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/24 16:45:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@
 
 # define THREAD_COUNT 4
 
-# define WIDTH 1600
-# define HEIGHT 1315
+# define WIDTH 1000
+# define HEIGHT 1000
 
 struct				s_app
 {
@@ -50,6 +50,7 @@ void				app_run(t_app *app);
 int					app_callback(void *param);
 void				app_draw_ui(t_app app);
 void				app_update(t_app *app);
+void				draw_screen(t_app *app);
 float				get_frametime();
 void				draw_string(t_app app, int x, int y, const char *fmt, ...);
 

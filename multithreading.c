@@ -68,14 +68,14 @@ void	compute_region_parallel(t_config confg, t_thread_pool *pool, t_surface16 it
 	if (rect.size.x == 0 || rect.size.y == 0)
 		return;
 
-	printf("compute_region_parallel\n\0\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
+//	printf("compute_region_parallel\n\0\norigin: %4g %4g,  size: %4g %4g\n", rect.origin.x, rect.origin.y, rect.size.x, rect.size.y);
 
 	int				i;
 	t_thread_config	thread_config_list[MAX_THREAD] = {};
 	int chunk_count = get_chunk_count(rect.size.y, confg.lines_per_chunk);
 	assert(chunk_count < MAX_THREAD);
 
-	printf("chunk_count: %d\n", chunk_count);
+//	printf("chunk_count: %d\n", chunk_count);
 
 	prepare_threads(confg, iter_frame, thread_config_list, chunk_count);
 	prepare_threads_chunks(thread_config_list, chunk_count, confg.lines_per_chunk, rect);
@@ -87,7 +87,7 @@ void	compute_region_parallel(t_config confg, t_thread_pool *pool, t_surface16 it
 	}
 
 	thread_pool_wait(pool);
-	printf("compute_region_parallel DONE\n");
+//	printf("compute_region_parallel DONE\n");
 }
 
 /*

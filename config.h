@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 17:02:04 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/24 15:17:49 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,6 @@ void			config_dezoom_from(t_config *cfg, int x, int y,
 									t_double2 win_size);
 
 void			config_move_by(t_config *cfg, t_double2 delta,
-							   t_double2 win_size);
+									t_double2 win_size);
 
 #endif
