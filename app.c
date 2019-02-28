@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/27 20:15:24 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 14:15:46 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,11 +42,10 @@ void	app_init(t_app *app)
 	memset(app->keystate, 0, sizeof(app->keystate));
 	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
 	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
-	app->surface.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
-	app->surface.size = win_size;
-	app->iter_buffer.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
-	app->iter_buffer.size = win_size;
-	memset(app->iter_buffer.iter, 0, sizeof(uint16_t) * win_size.x * win_size.y);
+	app->frame.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
+	app->frame.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
+	app->frame.size = win_size;
+	memset(app->frame.iter, 0, sizeof(uint16_t) * win_size.x * win_size.y);
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
 	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
@@ -73,7 +72,7 @@ void	app_update(t_app *app)
 	delta.x *= 4;
 	delta.y *= 4;
 	if (delta.x != 0 || delta.y != 0)
-		delta_draw(delta, &app->config, app->iter_buffer, app->surface, app->thread_pool);
+		delta_draw(delta, &app->config, app->frame, app->thread_pool);
 	if (app->keystate[KEY_PLUS])
 		app->config.depth_max += 50;
 	if (app->keystate[KEY_MINUS])
@@ -92,9 +91,9 @@ int		app_callback(void *param)
 //	if (1 || app->need_full_redraw)
 	if (app->need_full_redraw)
 	{
-		rect = (t_rect){{0, 0}, app->iter_buffer.size};
-		compute_region_parallel(app->config, app->thread_pool, app->iter_buffer, rect);
-		draw_color(app->config, app->surface, app->iter_buffer);
+		rect = (t_rect){{0, 0}, app->frame.size};
+		compute_region_parallel(app->config, app->thread_pool, app->frame, rect);
+		draw_color(app->config, app->frame);
 	}
 	draw_screen(app);
 	app->need_full_redraw = false;
@@ -112,7 +111,7 @@ void	app_draw_ui(t_app app)
 	draw_string(app, 10, 70, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
 	draw_string(app, 10, 90, "Threads: %d", app.thread_count);
 	draw_string(app, 10, 110, "Lines per chunk: %d", app.config.lines_per_chunk);
-	draw_string(app, 10, 130, "Chunk count %d", get_chunk_count(app.iter_buffer.size.y, app.config.lines_per_chunk));
+	draw_string(app, 10, 130, "Chunk count %d", get_chunk_count(app.frame.size.y, app.config.lines_per_chunk));
 	if (app.need_full_redraw)
 		draw_string(app, 10, 150, "FULL REDRAW");
 }

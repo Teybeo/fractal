@@ -23,14 +23,13 @@
 
 typedef struct	s_thread_config {
 	t_config	config;
-	t_double2	win_size;
-	uint16_t	*pixels;
+	t_frame		frame;
 	t_rect		rect;
 	short		thread_id;
 }				t_task_data;
 
 void			compute_region_parallel(t_config cfg, t_thread_pool *pool,
-					t_surface16 iter_frame, t_rect rect);
+					t_frame frame, t_rect rect);
 int				get_chunk_count(int line_count, int lines_per_chunk);
 void			prepare_task_chunks(t_task_data *task_data, int chunk_count,
 					int chunk_height, t_rect rect);

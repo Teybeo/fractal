@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/27 19:48:44 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 14:42:07 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,7 @@ struct				s_app
 	void			*mlx_context;
 	void			*mlx_texture;
 	void			*mlx_window;
-	t_surface		surface;
-	t_surface16		iter_buffer;
+	t_frame			frame;
 	t_config		config;
 	t_thread_pool	*thread_pool;
 	int				thread_count;

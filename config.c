@@ -6,13 +6,14 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/27 15:20:30 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 14:18:23 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "config.h"
 
 #include "coloring.h"
+#include "drawing.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +30,7 @@ t_config	config_init(t_double2 win_size)
 	config.z_max = (t_double2){2 * aspect_ratio, 2};
 	config.z_size = double2_sub(config.z_max, config.z_min);
 	config.z_mouse = (t_double2){0, 0};
-	config.fractal_fn = get_mandelbrot_value;
+	config.fractal_fn = &get_mandelbrot_value;
 	config.lines_per_chunk = LINES_PER_CHUNK;
 	config.palette = palette;
 	set_palette(palette, 0);

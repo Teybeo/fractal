@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 18:09:10 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 14:01:56 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,13 @@ int		mouse_move(int x, int y, void *param)
 	delta = double2_sub(new_pos, old_pos);
 	if (app->hold_left_click && (delta.x || delta.y))
 	{
-		try_delta_draw(delta, &app->config, app->iter_buffer, app->surface,
-				app->thread_pool);
+		try_delta_draw(delta, &app->config, app->frame, app->thread_pool);
 		draw_screen(app);
 	}
 	if (app->hold_right_click && app->config.fractal_fn == get_julia_value)
 	{
 		app->config.z_mouse = new_pos;
-		double2_remap(&app->config.z_mouse, app->iter_buffer.size,
+		double2_remap(&app->config.z_mouse, app->frame.size,
 				app->config.z_size, app->config.z_min);
 		app->need_full_redraw = true;
 	}
@@ -59,9 +58,9 @@ int		mouse_down(int button, int x, int y, void *param)
 	if (button == 2)
 		app->hold_right_click = true;
 	if (button == 4)
-		config_zoom_to(&app->config, x, y, app->surface.size);
+		config_zoom_to(&app->config, x, y, app->frame.size);
 	if (button == 5)
-		config_dezoom_from(&app->config, x, y, app->surface.size);
+		config_dezoom_from(&app->config, x, y, app->frame.size);
 	app->need_full_redraw = (button == 4 || button == 5);
 	if (app->need_full_redraw)
 		app_callback(param);

@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 20:15:28 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/23 21:01:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 14:18:35 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-void	compute_region(t_config cfg, t_rect rect, t_surface16 iter_frame)
+void	compute_region(t_config cfg, t_rect rect, t_frame frame)
 {
 	int			x;
 	int			y;
@@ -27,12 +27,12 @@ void	compute_region(t_config cfg, t_rect rect, t_surface16 iter_frame)
 	while (y < (rect.origin.y + rect.size.y))
 	{
 		x = (int)rect.origin.x;
-		c.y = (y / iter_frame.size.y) * (cfg.z_size.y) + (cfg.z_min.y);
+		c.y = (y / frame.size.y) * (cfg.z_size.y) + (cfg.z_min.y);
 		while (x < (rect.origin.x + rect.size.x))
 		{
-			c.x = (x / iter_frame.size.x) * (cfg.z_size.x) + (cfg.z_min.x);
+			c.x = (x / frame.size.x) * (cfg.z_size.x) + (cfg.z_min.x);
 			depth = cfg.fractal_fn(c, cfg.depth_max, cfg.z_mouse);
-			iter_frame.iter[(int)(y * iter_frame.size.x + x)] = (uint16_t)depth;
+			frame.iter[(int)(y * frame.size.x + x)] = (uint16_t)depth;
 			x++;
 		}
 		y++;

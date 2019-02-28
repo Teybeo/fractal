@@ -22,15 +22,13 @@
 void	*draw_task(void *param)
 {
 	t_task_data	task_data;
-	t_surface16	iter_frame;
 
 	task_data = *(t_task_data*)param;
-	iter_frame = (t_surface16) {task_data.pixels, task_data.win_size};
-	compute_region(task_data.config, task_data.rect, iter_frame);
+	compute_region(task_data.config, task_data.rect, task_data.frame);
 	return (NULL);
 }
 
-void	prepare_tasks(t_config config, t_surface16 iter_frame,
+void	prepare_tasks(t_config config, t_frame frame,
 						t_task_data *task_data, int thread_count)
 {
 	short i;
@@ -38,9 +36,8 @@ void	prepare_tasks(t_config config, t_surface16 iter_frame,
 	i = 0;
 	while (i < thread_count)
 	{
-		task_data[i].win_size = iter_frame.size;
 		task_data[i].config = config;
-		task_data[i].pixels = iter_frame.iter;
+		task_data[i].frame = frame;
 		task_data[i].thread_id = i;
 		i++;
 	}
@@ -70,7 +67,7 @@ void	prepare_task_chunks(t_task_data *task_data, int chunk_count,
 }
 
 void	compute_region_parallel(t_config cfg, t_thread_pool *pool,
-		t_surface16 iter_frame, t_rect rect)
+		t_frame frame, t_rect rect)
 {
 	int				i;
 	t_task_data		task_data[MAX_TASK_COUNT];
@@ -80,7 +77,7 @@ void	compute_region_parallel(t_config cfg, t_thread_pool *pool,
 		return ;
 	chunk_count = get_chunk_count(rect.size.y, cfg.lines_per_chunk);
 	assert(chunk_count < MAX_TASK_COUNT);
-	prepare_tasks(cfg, iter_frame, task_data, chunk_count);
+	prepare_tasks(cfg, frame, task_data, chunk_count);
 	prepare_task_chunks(task_data, chunk_count, cfg.lines_per_chunk, rect);
 	i = 0;
 	while (i < chunk_count)

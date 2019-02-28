@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 20:24:43 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/27 18:19:01 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 14:21:43 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,8 @@
 #include "multithreading.h"
 #include "coloring.h"
 
-void	delta_draw(t_double2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)
+void	delta_draw(t_double2 delta, t_config *config, t_frame frame,
+		t_thread_pool *pool)
 {
 	t_double2	src;
 	t_double2	dst;
@@ -27,20 +28,20 @@ void	delta_draw(t_double2 delta, t_config *config, t_surface16 iter_frame, t_sur
 	t_rect		tall_dirty_rect;
 	t_rect		wide_dirty_rect;
 
-	config_move_by(config, delta, iter_frame.size);
+	config_move_by(config, delta, frame.size);
 	src.x = (delta.x >= 0) ? 0 : -delta.x;
 	src.y = (delta.y >= 0) ? 0 : -delta.y;
 	dst.x = (delta.x >= 0) ? delta.x : 0;
 	dst.y = (delta.y >= 0) ? delta.y : 0;
-	region_size.x = iter_frame.size.x - fabs(delta.x);
-	region_size.y = iter_frame.size.y - fabs(delta.y);
-	copy_region(src, dst, region_size, iter_frame, color_frame);
-	wide_dirty_rect = get_wide_dirty_rect(iter_frame.size, delta);
-	tall_dirty_rect = get_tall_dirty_rect(iter_frame.size, delta);
-	compute_region_parallel(*config, pool, iter_frame, wide_dirty_rect);
-	compute_region_parallel(*config, pool, iter_frame, tall_dirty_rect);
-	draw_color_region(*config, color_frame, iter_frame, wide_dirty_rect);
-	draw_color_region(*config, color_frame, iter_frame, tall_dirty_rect);
+	region_size.x = frame.size.x - fabs(delta.x);
+	region_size.y = frame.size.y - fabs(delta.y);
+	copy_region(src, dst, region_size, frame);
+	wide_dirty_rect = get_wide_dirty_rect(frame.size, delta);
+	tall_dirty_rect = get_tall_dirty_rect(frame.size, delta);
+	compute_region_parallel(*config, pool, frame, wide_dirty_rect);
+	compute_region_parallel(*config, pool, frame, tall_dirty_rect);
+	draw_color_region(*config, frame, wide_dirty_rect);
+	draw_color_region(*config, frame, tall_dirty_rect);
 }
 
 t_rect	get_wide_dirty_rect(t_double2 frame_size, t_double2 delta)
@@ -69,15 +70,16 @@ t_rect	get_tall_dirty_rect(t_double2 frame_size, t_double2 delta)
 ** Basically a 2D memmove
 */
 
-void	copy_region(t_double2 src, t_double2 dst, t_double2 region_size, t_surface16 iter, t_surface color)
+void	copy_region(t_double2 src, t_double2 dst, t_double2 region_size,
+		t_frame frame)
 {
-	int	src_idx;
-	int	dst_idx;
-	int	stride;
-	int	co_line_bytes;
-	int	iter_line_bytes;
+	int		src_idx;
+	int		dst_idx;
+	int		stride;
+	size_t	pxl_line_bytes;
+	size_t	iter_line_bytes;
 
-	stride = (int)iter.size.x;
+	stride = (int)frame.size.x;
 	src_idx = (int)((src.y * stride) + src.x);
 	dst_idx = (int)((dst.y * stride) + dst.x);
 	if (dst_idx > src_idx)
@@ -86,12 +88,12 @@ void	copy_region(t_double2 src, t_double2 dst, t_double2 region_size, t_surface1
 		dst_idx += stride * ((int)region_size.y - 1);
 		stride *= -1;
 	}
-	co_line_bytes = (int)(region_size.x * sizeof(*color.pixels));
-	iter_line_bytes = (int)(region_size.x * sizeof(*iter.iter));
+	pxl_line_bytes = (size_t)(region_size.x * sizeof(*frame.pixels));
+	iter_line_bytes = (size_t)(region_size.x * sizeof(*frame.iter));
 	while (region_size.y--)
 	{
-		memmove(iter.iter + dst_idx, iter.iter + src_idx, iter_line_bytes);
-		memmove(color.pixels + dst_idx, color.pixels + src_idx, co_line_bytes);
+		memmove(frame.iter + dst_idx, frame.iter + src_idx, iter_line_bytes);
+		memmove(frame.pixels + dst_idx, frame.pixels + src_idx, pxl_line_bytes);
 		dst_idx += stride;
 		src_idx += stride;
 	}
@@ -104,18 +106,19 @@ void	copy_region(t_double2 src, t_double2 dst, t_double2 region_size, t_surface1
 ** Instead of copy_region + 2 smaller recompute (with a barrier in between)
 */
 
-void	try_delta_draw(t_double2 delta, t_config *config, t_surface16 iter_frame, t_surface color_frame, t_thread_pool *pool)
+void	try_delta_draw(t_double2 delta, t_config *config, t_frame frame,
+		t_thread_pool *pool)
 {
 	t_rect	rect;
 
-	if (fabs(delta.x) > iter_frame.size.x * 0.75
-		|| fabs(delta.y) > iter_frame.size.y * 0.75)
+	if (fabs(delta.x) > frame.size.x * 0.75
+		|| fabs(delta.y) > frame.size.y * 0.75)
 	{
-		rect = (t_rect) {{0, 0}, iter_frame.size};
-		config_move_by(config, delta, iter_frame.size);
-		compute_region_parallel(*config, pool, iter_frame, rect);
-		draw_color(*config, color_frame, iter_frame);
+		rect = (t_rect) {{0, 0}, frame.size};
+		config_move_by(config, delta, frame.size);
+		compute_region_parallel(*config, pool, frame, rect);
+		draw_color(*config, frame);
 	}
 	else
-		delta_draw(delta, config, iter_frame, color_frame, pool);
+		delta_draw(delta, config, frame, pool);
 }
