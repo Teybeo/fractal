@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 18:09:10 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 14:01:56 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 18:03:50 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,6 @@
 
 #include <stdio.h>
 #include <mlx.h>
-#include <math.h>
 
 int		mouse_move(int x, int y, void *param)
 {

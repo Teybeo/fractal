@@ -18,6 +18,7 @@ set(CMAKE_C_STANDARD 99)
 set(SOURCE_FILES
         main.c
         app.c
+        app_utils.c
         t_double2.c
         t_double2_util.c
         multithreading.c

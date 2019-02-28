@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 14:15:46 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 18:17:59 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,10 @@
 #include "mouse_events.h"
 
 #include <mlx.h>
-#include <stdbool.h>
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
-#include <assert.h>
-#include <stdarg.h>
 
 void	app_init(t_app *app)
 {
@@ -37,15 +33,24 @@ void	app_init(t_app *app)
 	app->config = config_init(win_size);
 	app->thread_count = THREAD_COUNT;
 	app->thread_pool = create_thread_pool(app->thread_count);
-	app->hold_left_click = false;
 	app->need_full_redraw = true;
 	memset(app->keystate, 0, sizeof(app->keystate));
-	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
 	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
-	app->frame.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
-	app->frame.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
+	app->mlx_window =
+			mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
 	app->frame.size = win_size;
+	app->frame.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
+	app->frame.pixels =
+			(uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
 	memset(app->frame.iter, 0, sizeof(uint16_t) * win_size.x * win_size.y);
+	set_hooks(app);
+}
+
+void	set_hooks(t_app *app)
+{
+	int			osef;
+
+	osef = 0xDEADBEEF;
 	mlx_do_key_autorepeatoff(app->mlx_context);
 	mlx_hook(app->mlx_window, 2, osef, keydown_event, app);
 	mlx_hook(app->mlx_window, 3, osef, keyup_event, app);
@@ -88,63 +93,14 @@ int		app_callback(void *param)
 
 	app = param;
 	app_update(app);
-//	if (1 || app->need_full_redraw)
 	if (app->need_full_redraw)
 	{
 		rect = (t_rect){{0, 0}, app->frame.size};
-		compute_region_parallel(app->config, app->thread_pool, app->frame, rect);
+		compute_region_parallel(app->config, app->thread_pool, app->frame,
+																		rect);
 		draw_color(app->config, app->frame);
 	}
 	draw_screen(app);
 	app->need_full_redraw = false;
 	return (0);
-}
-
-void	app_draw_ui(t_app app)
-{
-	float	time;
-
-	time = get_frametime();
-	draw_string(app, 10, 10, "Frametime: %-7.4g ms (%-3.3g fps)", time, 1000 / time);
-	draw_string(app, 10, 30, "Depth max: %-5d", app.config.depth_max);
-	draw_string(app, 10, 50, "Size: %g, %g", app.config.z_size.x, app.config.z_size.y);
-	draw_string(app, 10, 70, "Center: %g, %g", app.config.z_min.x + app.config.z_size.x / 2, app.config.z_min.y + app.config.z_size.y / 2);
-	draw_string(app, 10, 90, "Threads: %d", app.thread_count);
-	draw_string(app, 10, 110, "Lines per chunk: %d", app.config.lines_per_chunk);
-	draw_string(app, 10, 130, "Chunk count %d", get_chunk_count(app.frame.size.y, app.config.lines_per_chunk));
-	if (app.need_full_redraw)
-		draw_string(app, 10, 150, "FULL REDRAW");
-}
-
-void	draw_screen(t_app *app)
-{
-	mlx_clear_window(app->mlx_context, app->mlx_window);
-	mlx_put_image_to_window(
-			app->mlx_context, app->mlx_window, app->mlx_texture, 0, 0);
-	app_draw_ui(*app);
-}
-
-void	draw_string(t_app app, int x, int y, const char *fmt, ...)
-{
-	char	string[512];
-	va_list args;
-
-	va_start(args, fmt);
-	memset(string, 0, sizeof(string));
-	vsprintf(string, fmt, args);
-	mlx_string_put(app.mlx_context, app.mlx_window, x, y, 0x00FFFFFF, string);
-	va_end(args);
-}
-
-float	get_frametime(void)
-{
-	static struct timespec	start = {0, 0};
-	struct timespec			now;
-	float					duration;
-
-	clock_gettime(CLOCK_REALTIME, &now);
-	duration = (now.tv_sec - start.tv_sec) * 1000
-			+ (now.tv_nsec - start.tv_nsec) / 1000000.f;
-	start = now;
-	return (duration);
 }

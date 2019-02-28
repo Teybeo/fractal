@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 14:42:07 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/28 18:08:07 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,10 +45,12 @@ struct				s_app
 typedef struct s_app	t_app;
 
 void				app_init(t_app *app);
+void				set_hooks(t_app *app);
 void				app_run(t_app *app);
-int					app_callback(void *param);
-void				app_draw_ui(t_app app);
 void				app_update(t_app *app);
+int					app_callback(void *param);
+
+void				app_draw_ui(t_app app);
 void				draw_screen(t_app *app);
 float				get_frametime();
 void				draw_string(t_app app, int x, int y, const char *fmt, ...);
