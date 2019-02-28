@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 19:01:22 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/23 21:01:39 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/02/27 20:38:45 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,7 @@ int		keyup_event(int key, void *param)
 	if (key == KEY_ZOOM || key == KEY_DEZOOM)
 		config_zoom_factor(cfg, (key == KEY_ZOOM) ? ZOOM : DEZOOM);
 	if (key == KEY_1 || key == KEY_2 || key == KEY_3)
-		cfg->fractal_fn = g_fractal_map[key];
+		cfg->fractal_fn = g_fractal_map[key - KEY_1];
 	if (key == KEY_KP_1 || key == KEY_KP_2)
 		set_palette(cfg->palette, key - KEY_KP_1);
 	app->need_full_redraw = is_full_redraw_key_event(key);
