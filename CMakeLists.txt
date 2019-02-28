@@ -11,7 +11,7 @@ link_libraries(-fsanitize=address -g3)
 
 set(CMAKE_C_FLAGS_DEBUG "-g3")
 #set(CMAKE_C_FLAGS_DEBUG "-Og")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -march=native")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -ffast-math -flto -march=native")
 
 set(CMAKE_C_STANDARD 99)
 
@@ -31,6 +31,7 @@ set(SOURCE_FILES
         gradient.c
         rgb.c
         gradient_definitions.c
+        work_queue.c
         )
 
 add_executable(fractol ${SOURCE_FILES})
