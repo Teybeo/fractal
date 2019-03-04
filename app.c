@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 18:17:59 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/04 15:06:15 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,14 +23,14 @@
 #include <memory.h>
 #include <math.h>
 
-void	app_init(t_app *app)
+void	app_init(t_app *app, int fractal_index)
 {
 	int			osef;
 	t_double2	win_size;
 
 	win_size = (t_double2){WIDTH, HEIGHT};
 	app->mlx_context = mlx_init();
-	app->config = config_init(win_size);
+	app->config = config_init(win_size, fractal_index);
 	app->thread_count = THREAD_COUNT;
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->need_full_redraw = true;

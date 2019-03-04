@@ -18,13 +18,6 @@
 
 #include "app.h"
 
-static const t_fractl_fn g_fractal_map[3] =
-{
-	&get_mandelbrot_value,
-	&get_julia_value,
-	&get_burningship_value,
-};
-
 bool	is_full_redraw_key_event(int key)
 {
 	return (key == KEY_MORE || key == KEY_LESS
@@ -42,7 +35,7 @@ int		keyup_event(int key, void *param)
 	cfg = &app->config;
 	app->keystate[key] = false;
 	if (key == KEY_R)
-		*cfg = config_init(app->frame.size);
+		*cfg = config_init(app->frame.size, 0);
 	(key == KEY_ESCAPE) && quit_event();
 	(key == KEY_G) && (cfg->show_chunks ^= 1);
 	(key == KEY_P) && (cfg->show_palette ^= 1);

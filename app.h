@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2018/12/11 15:08:17 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 18:08:07 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/04 14:46:18 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ struct				s_app
 };
 typedef struct s_app	t_app;
 
-void				app_init(t_app *app);
+void				app_init(t_app *app, int fractal_index);
 void				set_hooks(t_app *app);
 void				app_run(t_app *app);
 void				app_update(t_app *app);

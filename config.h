@@ -46,7 +46,7 @@ typedef struct s_rect	t_rect;
 # define ZOOM (0.5)
 # define DEZOOM (2)
 
-t_config		config_init(t_double2 win_size);
+t_config		config_init(t_double2 win_size, int fractal_index);
 void			config_zoom_factor(t_config *cfg, double factor);
 void			config_zoom_to(t_config *cfg, int x, int y,
 									t_double2 win_size);

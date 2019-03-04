@@ -22,4 +22,11 @@ int		get_mandelbrot_value(t_double2 c, int depth_max);
 int		get_burningship_value(t_double2 c, int depth_max);
 int		get_julia_value(t_double2 c, int depth_max, t_double2 z_in);
 
+static const t_fractl_fn g_fractal_map[3] =
+{
+	&get_mandelbrot_value,
+	&get_julia_value,
+	&get_burningship_value,
+};
+
 #endif
