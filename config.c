@@ -32,7 +32,7 @@ t_config	config_init(t_double2 win_size, int fractal_index)
 	config.z_max = (t_double2){2 * aspect_ratio, 2};
 	config.z_size = double2_sub(config.z_max, config.z_min);
 	config.z_mouse = (t_double2){0, 0};
-	config.fractal_fn = g_fractal_map[fractal_index];
+	config.fractal_fn = get_fractal_by_index(fractal_index);
 	config.lines_per_chunk = LINES_PER_CHUNK;
 	config.palette = palette;
 	set_palette(palette, 0);

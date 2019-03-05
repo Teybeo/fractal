@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 20:15:28 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 14:18:35 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 17:00:31 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@
 
 #include <math.h>
 
-void	compute_region(t_config cfg, t_rect rect, t_frame frame)
+void		compute_region(t_config cfg, t_rect rect, t_frame frame)
 {
 	int			x;
 	int			y;
@@ -39,7 +39,7 @@ void	compute_region(t_config cfg, t_rect rect, t_frame frame)
 	}
 }
 
-int		get_mandelbrot_value(t_double2 c, int depth_max)
+int			get_mandelbrot_value(t_double2 c, int depth_max)
 {
 	t_double2	z;
 	int			depth;
@@ -59,7 +59,7 @@ int		get_mandelbrot_value(t_double2 c, int depth_max)
 	return (depth);
 }
 
-int		get_burningship_value(t_double2 c, int depth_max)
+int			get_burningship_value(t_double2 c, int depth_max)
 {
 	t_double2	z;
 	int			depth;
@@ -80,7 +80,7 @@ int		get_burningship_value(t_double2 c, int depth_max)
 	return (depth);
 }
 
-int		get_julia_value(t_double2 z_in, int depth_max, t_double2 c)
+int			get_julia_value(t_double2 z_in, int depth_max, t_double2 c)
 {
 	t_double2	z;
 	int			depth;
@@ -98,4 +98,15 @@ int		get_julia_value(t_double2 z_in, int depth_max, t_double2 c)
 	if (depth >= depth_max)
 		return (0);
 	return (depth);
+}
+
+t_fractl_fn	get_fractal_by_index(int index)
+{
+	if (index == 0)
+		return (get_mandelbrot_value);
+	if (index == 1)
+		return (get_julia_value);
+	if (index == 2)
+		return (get_burningship_value);
+	return (NULL);
 }
