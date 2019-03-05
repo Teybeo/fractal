@@ -26,7 +26,7 @@ OBJ_LIST = $(SRCS:.c=.o)
 
 OBJS = $(addprefix $(OBJ_DIR)/,$(OBJ_LIST))
 
-#LIBS = -l ft -L libft
+LIBS = -l ft -L libft
 INCLUDES = -I libft/
 
 LIBS += libmlx.a -framework OpenGL -framework AppKit
@@ -34,7 +34,7 @@ LIBS += libmlx.a -framework OpenGL -framework AppKit
 all: $(NAME)
 
 $(NAME): $(OBJ_DIR) $(OBJS)
-#	make -C ./libft
+	make -C ./libft
 	sh patch_mlx.sh
 	gcc -o $(NAME) $(OBJS) $(INCLUDES) $(LIBS)
 
@@ -45,15 +45,15 @@ $(OBJ_DIR)/%.o : %.c
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)
-#	mkdir -p $(OBJ_DIR)/libft/
+	mkdir -p $(OBJ_DIR)/libft/
 
 clean :
-#	make clean -C ./libft
+	make clean -C ./libft
 	rm -rf $(OBJ_DIR)
 	rm -f libmlx.a
 
 fclean : clean
-#	make fclean -C ./libft
+	make fclean -C ./libft
 	rm -f $(NAME)
 
 re : fclean

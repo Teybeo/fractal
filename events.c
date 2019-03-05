@@ -6,17 +6,17 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 19:01:22 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/05 14:55:10 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 18:38:08 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "events.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <mlx.h>
 
 #include "app.h"
+#include "libft/libft.h"
 
 bool	is_full_redraw_key_event(int key)
 {
@@ -66,14 +66,14 @@ int		keydown_event(int keycode, void *param)
 
 int		expose_callback(void *param)
 {
-	puts("EXPOSE CALLBACK");
+	ft_puts("EXPOSE CALLBACK");
 	(void)param;
 	return (0);
 }
 
 int		quit_event(void)
 {
-	puts("Bye");
+	ft_puts("Bye");
 	exit(0);
 	return (0);
 }

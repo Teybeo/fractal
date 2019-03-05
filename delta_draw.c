@@ -6,18 +6,17 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 20:24:43 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 14:21:43 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 19:40:30 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "delta_draw.h"
 
-#include <math.h>
-#include <stdio.h>
-#include <string.h>
 #include "config.h"
 #include "multithreading.h"
 #include "coloring.h"
+#include "libft/libft.h"
+#include <math.h>
 
 void	delta_draw(t_double2 delta, t_config *config, t_frame frame,
 		t_thread_pool *pool)
@@ -76,8 +75,8 @@ void	copy_region(t_double2 src, t_double2 dst, t_double2 region_size,
 	int		src_idx;
 	int		dst_idx;
 	int		stride;
-	size_t	pxl_line_bytes;
-	size_t	iter_line_bytes;
+	size_t	pixel_width;
+	size_t	iter_width;
 
 	stride = (int)frame.size.x;
 	src_idx = (int)((src.y * stride) + src.x);
@@ -88,12 +87,12 @@ void	copy_region(t_double2 src, t_double2 dst, t_double2 region_size,
 		dst_idx += stride * ((int)region_size.y - 1);
 		stride *= -1;
 	}
-	pxl_line_bytes = (size_t)(region_size.x * sizeof(*frame.pixels));
-	iter_line_bytes = (size_t)(region_size.x * sizeof(*frame.iter));
+	pixel_width = (size_t)(region_size.x * sizeof(*frame.pixels));
+	iter_width = (size_t)(region_size.x * sizeof(*frame.iter));
 	while (region_size.y--)
 	{
-		memmove(frame.iter + dst_idx, frame.iter + src_idx, iter_line_bytes);
-		memmove(frame.pixels + dst_idx, frame.pixels + src_idx, pxl_line_bytes);
+		ft_memmove(frame.iter + dst_idx, frame.iter + src_idx, iter_width);
+		ft_memmove(frame.pixels + dst_idx, frame.pixels + src_idx, pixel_width);
 		dst_idx += stride;
 		src_idx += stride;
 	}

@@ -1,4 +1,6 @@
 .idea/
 cmake-build*
 bin/
+obj/
 libmlx.a
+*/*.o

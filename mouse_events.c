@@ -16,7 +16,6 @@
 #include "app.h"
 #include "delta_draw.h"
 
-#include <stdio.h>
 #include <mlx.h>
 
 int		mouse_move(int x, int y, void *param)

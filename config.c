@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/27 15:20:30 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/04 18:03:31 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 18:46:55 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,9 @@
 
 #include "coloring.h"
 #include "drawing.h"
+#include "libft/libft.h"
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 t_config	config_init(t_double2 win_size, int fractal_index)
 {
@@ -25,7 +24,7 @@ t_config	config_init(t_double2 win_size, int fractal_index)
 	double			aspect_ratio;
 	t_config		config;
 
-	memset(&config, 0, sizeof(t_config));
+	ft_memzero(&config, 1, sizeof(t_config));
 	aspect_ratio = win_size.x / win_size.y;
 	config.depth_max = DEPTH_MAX;
 	config.z_min = (t_double2){-2 * aspect_ratio, -2};

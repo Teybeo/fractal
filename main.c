@@ -6,23 +6,22 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 18:11:09 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/04 18:24:17 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 18:38:08 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "app.h"
+#include "libft/libft.h"
 #include <unistd.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 void	print_usage(void)
 {
-	puts("Usage:");
-	puts("  ./fractol");
-	puts("  ./fractol mandelbrot");
-	puts("  ./fractol julia");
-	puts("  ./fractol burning_ship");
+	ft_puts("Usage:");
+	ft_puts("  ./fractol");
+	ft_puts("  ./fractol mandelbrot");
+	ft_puts("  ./fractol julia");
+	ft_puts("  ./fractol burning_ship");
 }
 
 int		parse_fractal_index(int argc, char **argv)
@@ -35,11 +34,11 @@ int		parse_fractal_index(int argc, char **argv)
 		exit(0);
 	}
 	fractal_index = -1;
-	if (strcmp(argv[1], "mandelbrot") == 0)
+	if (ft_strequ(argv[1], "mandelbrot"))
 		fractal_index = 0;
-	if (strcmp(argv[1], "julia") == 0)
+	if (ft_strequ(argv[1], "julia"))
 		fractal_index = 1;
-	if (strcmp(argv[1], "burning_ship") == 0)
+	if (ft_strequ(argv[1], "burning_ship"))
 		fractal_index = 2;
 	if (fractal_index == -1)
 	{

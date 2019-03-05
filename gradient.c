@@ -15,7 +15,6 @@
 #include "gradient_definitions.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
 t_gradient	create_gradient(int gradient_type)
 {

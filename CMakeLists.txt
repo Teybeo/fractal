@@ -33,6 +33,12 @@ set(SOURCE_FILES
         rgb.c
         gradient_definitions.c
         work_queue.c
+        libft/ft_memcpy.c
+        libft/ft_memzero.c
+        libft/ft_memmove.c
+        libft/ft_strlen.c
+        libft/ft_puts.c
+        libft/ft_strequ.c
         )
 
 add_executable(fractol ${SOURCE_FILES})

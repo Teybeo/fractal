@@ -15,7 +15,6 @@
 
 #include <pthread.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <assert.h>
 #include <math.h>
 

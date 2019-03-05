@@ -6,15 +6,15 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/28 18:09:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 18:25:14 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 19:42:50 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "app.h"
+#include "libft/libft.h"
 
 #include <mlx.h>
 #include <stdarg.h>
-#include <string.h>
 #include <stdio.h>
 
 void	draw_screen(t_app *app)
@@ -53,7 +53,7 @@ void	draw_string(t_app app, int x, int y, const char *fmt, ...)
 	va_list	args;
 
 	va_start(args, fmt);
-	memset(string, 0, sizeof(string));
+	ft_memzero(string, 1, sizeof(string));
 	vsprintf(string, fmt, args);
 	mlx_string_put(app.mlx_context, app.mlx_window, x, y, 0x00FFFFFF, string);
 	va_end(args);

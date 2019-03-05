@@ -6,14 +6,14 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/28 16:11:53 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 16:39:15 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/05 19:40:56 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "thread_pool.h"
+#include "libft/libft.h"
 
 #include <stdlib.h>
-#include <memory.h>
 #include <stdbool.h>
 
 t_thread_pool	*create_thread_pool(int thread_count)
@@ -71,7 +71,7 @@ void			thread_pool_add_work(t_thread_pool *pool, void *data,
 
 	new = malloc(sizeof(t_work_queue));
 	new->data = malloc(data_size);
-	memcpy(new->data, data, data_size);
+	ft_memcpy(new->data, data, data_size);
 	new->task = task;
 	new->next = NULL;
 	pthread_mutex_lock(&pool->queue_mutex);
