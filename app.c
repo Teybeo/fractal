@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/05 19:43:15 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/06 20:02:49 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,10 +17,10 @@
 #include "delta_draw.h"
 #include "mouse_events.h"
 #include "libft/libft.h"
+#include "key_event.h"
 
-#include <mlx.h>
 #include <stdlib.h>
-#include <math.h>
+#include <mlx.h>
 
 void	app_init(t_app *app, int fractal_index)
 {

@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 18:09:10 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/28 18:03:50 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/06 18:56:58 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 #include "t_double2.h"
 #include "app.h"
 #include "delta_draw.h"
-
-#include <mlx.h>
+#include "fractal_functions.h"
+#include "fractal_list.h"
 
 int		mouse_move(int x, int y, void *param)
 {
@@ -33,7 +33,7 @@ int		mouse_move(int x, int y, void *param)
 		try_delta_draw(delta, &app->config, app->frame, app->thread_pool);
 		draw_screen(app);
 	}
-	if (app->hold_right_click && app->config.fractal_fn == get_julia_value)
+	if (app->hold_right_click && is_julia_type(app->config.fractal_index))
 	{
 		app->config.z_mouse = new_pos;
 		double2_remap(&app->config.z_mouse, app->frame.size,

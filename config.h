@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/23 17:02:04 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/02/27 18:05:59 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/06 18:31:17 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ struct			s_config
 	t_double2	z_size;
 	t_double2	z_mouse;
 	short		lines_per_chunk;
+	char		fractal_index;
 	t_fractl_fn	fractal_fn;
 	bool		show_chunks;
 	bool		show_palette;
@@ -46,7 +47,7 @@ typedef struct s_rect	t_rect;
 # define ZOOM (0.5)
 # define DEZOOM (2)
 
-t_config		config_init(t_double2 win_size, int fractal_index);
+t_config		config_init(t_double2 win_size, char fractal_index);
 void			config_zoom_factor(t_config *cfg, double factor);
 void			config_zoom_to(t_config *cfg, int x, int y,
 									t_double2 win_size);

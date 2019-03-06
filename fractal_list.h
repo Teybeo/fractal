@@ -1,21 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   drawing.h                                          :+:      :+:    :+:   */
+/*   fractal_list.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2019/02/23 16:59:59 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/06 18:32:01 by tdarchiv         ###   ########.fr       */
+/*   Created: 2019/03/06 18:33:34 by tdarchiv          #+#    #+#             */
+/*   Updated: 2019/03/06 19:39:54 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef DRAWING_H
-# define DRAWING_H
+#ifndef FRACTOL_FRACTAL_LIST_H
+# define FRACTOL_FRACTAL_LIST_H
 
-# include "config.h"
-# include "coloring.h"
+# define FRACTAL_COUNT 8
 
-void		compute_region(t_config cfg, t_rect rect, t_frame frame);
+typedef struct	s_fractal {
+	t_fractl_fn	fn_ptr;
+	char		*name;
+	bool		is_julia_type;
+}				t_fractal;
+
+t_fractl_fn		get_fractal_fn(int index);
+const char		*get_fractal_name(int index);
+char			get_fractal_index_by_name(const char *name);
+bool			is_julia_type(int index);
 
 #endif

@@ -19,6 +19,7 @@
 # include "coloring.h"
 # include "thread_pool.h"
 # include "events.h"
+# include "key_event.h"
 
 # include <stdint.h>
 # include <stdbool.h>

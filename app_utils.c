@@ -6,12 +6,13 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/28 18:09:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/05 19:42:50 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/06 18:32:12 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "app.h"
 #include "libft/libft.h"
+#include "fractal_list.h"
 
 #include <mlx.h>
 #include <stdarg.h>
@@ -30,21 +31,22 @@ void	app_draw_ui(t_app app)
 	float	time;
 
 	time = get_frametime();
-	draw_string(app, 10, 10, "Frametime: %7.2f ms (%7.2f fps)",
+	draw_string(app, 10, 10, get_fractal_name(app.config.fractal_index));
+	draw_string(app, 10, 30, "Frametime: %7.2f ms (%7.2f fps)",
 			time, 1000 / time);
-	draw_string(app, 10, 30, "Depth max: %-5d", app.config.depth_max);
-	draw_string(app, 10, 50, "Size: %g, %g",
+	draw_string(app, 10, 50, "Depth max: %-5d", app.config.depth_max);
+	draw_string(app, 10, 70, "Size: %g, %g",
 			app.config.z_size.x, app.config.z_size.y);
-	draw_string(app, 10, 70, "Center: %g, %g",
+	draw_string(app, 10, 90, "Center: %g, %g",
 			app.config.z_min.x + app.config.z_size.x / 2,
 			app.config.z_min.y + app.config.z_size.y / 2);
-	draw_string(app, 10, 90, "Threads: %d", app.thread_count);
-	draw_string(app, 10, 110, "Lines per chunk: %d",
+	draw_string(app, 10, 110, "Threads: %d", app.thread_count);
+	draw_string(app, 10, 130, "Lines per chunk: %d",
 			app.config.lines_per_chunk);
-	draw_string(app, 10, 130, "Chunk count %d",
+	draw_string(app, 10, 150, "Chunk count %d",
 			get_chunk_count(app.frame.size.y, app.config.lines_per_chunk));
 	if (app.need_full_redraw)
-		draw_string(app, 10, 150, "FULL REDRAW");
+		draw_string(app, 10, 170, "FULL REDRAW");
 }
 
 void	draw_string(t_app app, int x, int y, const char *fmt, ...)

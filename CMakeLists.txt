@@ -28,7 +28,10 @@ set(SOURCE_FILES
         events.c
         delta_draw.c
         mouse_events.c
+        key_event.c
         drawing.c
+        fractal_functions.c
+        fractal_list.c
         gradient.c
         rgb.c
         gradient_definitions.c
