@@ -17,11 +17,19 @@
 
 void	print_usage(void)
 {
+	int			i;
+	t_fractal	*fractal_list;
+
 	ft_puts("Usage:");
 	ft_puts("  ./fractol");
-	ft_puts("  ./fractol mandelbrot");
-	ft_puts("  ./fractol julia");
-	ft_puts("  ./fractol burning_ship");
+	i = 0;
+	fractal_list = get_fractal_list();
+	while (i < FRACTAL_COUNT)
+	{
+		ft_putstr("  ./fractol ");
+		ft_puts(fractal_list[i].name);
+		i++;
+	}
 }
 
 int		main(int argc, char **argv)
