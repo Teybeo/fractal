@@ -19,7 +19,8 @@ SRCS += rgb.c
 SRCS += gradient_definitions.c
 SRCS += work_queue.c
 SRCS += fractal_list.c
-SRCS += fractal_functions.c
+SRCS += julia_functions.c
+SRCS += mandelbrot_functions.c
 
 FLAGS = -Wall -Wextra -Werror
 FLAGS += -O2 -march=native

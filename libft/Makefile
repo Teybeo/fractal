@@ -5,6 +5,7 @@ SRCS += ft_memzero.c
 SRCS += ft_memmove.c
 SRCS += ft_strlen.c
 SRCS += ft_puts.c
+SRCS += ft_putstr.c
 SRCS += ft_strequ.c
 
 OBJS = $(SRCS:.c=.o)
