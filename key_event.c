@@ -76,6 +76,5 @@ int		keydown_event(int keycode, void *param)
 
 	app = param;
 	app->keystate[keycode] = true;
-	printf("%d keycode\n", keycode);
 	return (0);
 }
