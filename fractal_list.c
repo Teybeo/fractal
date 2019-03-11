@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/03/06 18:33:39 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/06 19:41:41 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/11 14:03:38 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include "fractal_list.h"
 #include "fractal_functions.h"
 #include "libft/libft.h"
+#include "fractal_functions.h"
 
 t_fractal	*get_fractal_list(void)
 {
@@ -22,11 +23,11 @@ t_fractal	*get_fractal_list(void)
 			(t_fractal){get_mandelbrot_value, "mandelbrot", false},
 			(t_fractal){get_mandelbrot3_value, "mandelbrot3", false},
 			(t_fractal){get_burningship_value, "burningship", false},
-			(t_fractal){get_burningmandelbrot3_value, "burningmandelbrot3", false},
+			(t_fractal){get_burningmandelbrot3_value, "absmandelbrot3", false},
 			(t_fractal){get_julia_value, "julia", true},
 			(t_fractal){get_julia3_value, "julia3", true},
-			(t_fractal){get_burning_julia_value, "bruningjulia", true},
-			(t_fractal){get_burningjulia3_value, "bruningjulia3", true},
+			(t_fractal){get_burning_julia_value, "absjulia", true},
+			(t_fractal){get_burningjulia3_value, "absjulia3", true},
 	};
 
 	return (fractal_list);

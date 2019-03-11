@@ -21,7 +21,6 @@ typedef struct	s_fractal {
 	bool		is_julia_type;
 }				t_fractal;
 
-
 t_fractal		*get_fractal_list(void);
 t_fractl_fn		get_fractal_fn(int index);
 const char		*get_fractal_name(int index);

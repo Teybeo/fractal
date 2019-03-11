@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/11 13:42:02 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/11 13:52:10 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,8 @@ void	app_init(t_app *app, int fractal_index)
 
 	win_size = (t_double2){WIDTH, HEIGHT};
 	ft_memzero(app, 1, sizeof(t_app));
-	app->mlx_context = mlx_init();
+	if ((app->mlx_context = mlx_init()) == NULL)
+		exit(0);
 	app->config = config_init(win_size, fractal_index);
 	app->thread_count = THREAD_COUNT;
 	app->thread_pool = create_thread_pool(app->thread_count);

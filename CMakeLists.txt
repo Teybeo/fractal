@@ -30,7 +30,8 @@ set(SOURCE_FILES
         mouse_events.c
         key_event.c
         drawing.c
-        fractal_functions.c
+        mandelbrot_functions.c
+        julia_functions.c
         fractal_list.c
         gradient.c
         rgb.c
