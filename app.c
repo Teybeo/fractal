@@ -6,7 +6,7 @@
 /*   By: tdarchiv <tdarchiv@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/02/24 14:38:58 by tdarchiv          #+#    #+#             */
-/*   Updated: 2019/03/06 20:02:49 by tdarchiv         ###   ########.fr       */
+/*   Updated: 2019/03/11 13:42:02 by tdarchiv         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,13 +35,13 @@ void	app_init(t_app *app, int fractal_index)
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->need_full_redraw = true;
 	ft_memzero(app->keystate, 1, sizeof(app->keystate));
-	app->mlx_window =
-			mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
+	app->mlx_window = mlx_new_window(app->mlx_context, win_size.x, win_size.y,
+			"Fractol");
 	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
 	app->frame.size = win_size;
 	app->frame.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
-	app->frame.pixels =
-			(uint32_t*)mlx_get_data_addr(app->mlx_texture, &osef, &osef, &osef);
+	app->frame.pixels = (uint32_t*)mlx_get_data_addr(app->mlx_texture,
+														&osef, &osef, &osef);
 	ft_memzero(app->frame.iter, 1, sizeof(uint16_t) * win_size.x * win_size.y);
 	set_hooks(app);
 }
