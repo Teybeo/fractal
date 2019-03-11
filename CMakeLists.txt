@@ -42,7 +42,7 @@ set(SOURCE_FILES
         libft/ft_strlen.c
         libft/ft_puts.c
         libft/ft_strequ.c
-        )
+        libft/ft_putstr.c)
 
 add_executable(fractol ${SOURCE_FILES})
 

@@ -35,9 +35,9 @@ void	app_init(t_app *app, int fractal_index)
 	app->thread_pool = create_thread_pool(app->thread_count);
 	app->need_full_redraw = true;
 	ft_memzero(app->keystate, 1, sizeof(app->keystate));
-	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
 	app->mlx_window =
 			mlx_new_window(app->mlx_context, win_size.x, win_size.y, "Fractol");
+	app->mlx_texture = mlx_new_image(app->mlx_context, win_size.x, win_size.y);
 	app->frame.size = win_size;
 	app->frame.iter = malloc(sizeof(uint16_t) * win_size.x * win_size.y);
 	app->frame.pixels =
