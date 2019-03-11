@@ -10,6 +10,7 @@ SRCS += config.c
 SRCS += coloring.c
 SRCS += thread_pool.c
 SRCS += events.c
+SRCS += key_event.c
 SRCS += delta_draw.c
 SRCS += mouse_events.c
 SRCS += drawing.c
@@ -17,6 +18,8 @@ SRCS += gradient.c
 SRCS += rgb.c
 SRCS += gradient_definitions.c
 SRCS += work_queue.c
+SRCS += fractal_list.c
+SRCS += fractal_functions.c
 
 FLAGS = -Wall -Wextra -Werror
 FLAGS += -O2 -march=native
